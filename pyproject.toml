@@ -1,0 +1,227 @@
+[project]
+name = "agon-python"
+dynamic = ["version"]
+description = "Adaptive Guarded Object Notation - A schema-driven, token-efficient data interchange format for LLMs"
+authors = [
+    { name = "Harvey Tseng", email = "harveytseng2@gmail.com" },
+]
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11,<4.0"
+keywords = [
+    "llm",
+    "json",
+    "compression",
+    "tokens",
+    "schema",
+    "encoding",
+    "ai",
+    "machine-learning",
+    "data-interchange",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+dependencies = [
+    "orjson>=3.11.5",
+    "tiktoken>=0.5.0",
+]
+
+
+[project.urls]
+Repository = "https://github.com/Verdenroz/agon"
+Issues = "https://github.com/Verdenroz/agon/issues"
+Documentation = "https://github.com/Verdenroz/agon#readme"
+Changelog = "https://github.com/Verdenroz/agon/releases"
+
+
+[dependency-groups]
+dev = [
+    # Testing
+    "pytest>=8.3.5",
+    "pytest-cov>=4.0.0",
+    "pytest-sugar>=1.0.0",
+    # Code quality
+    "ruff>=0.11.9",
+    "basedpyright>=1.29.1",
+    "codespell>=2.4.1",
+    # Development utilities
+    "pre-commit>=3.6.0",
+    "nox>=2025.5.1",
+    "funlog>=0.2.1",
+    "rich>=14.2.0",
+]
+
+
+[build-system]
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.uv-dynamic-versioning]
+vcs = "git"
+style = "pep440"
+bump = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agon"]
+
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    # Pyflakes
+    "F",
+    # pycodestyle
+    "E", "W",
+    # isort
+    "I",
+    # pydocstyle
+    "D",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # flake8-comprehensions
+    "C4",
+    # flake8-implicit-str-concat
+    "ISC",
+    # flake8-pytest-style
+    "PT",
+    # flake8-return
+    "RET",
+    # flake8-self
+    "SLF",
+    # flake8-type-checking
+    "TCH",
+    # tryceratops
+    "TRY",
+    # Ruff-specific rules
+    "RUF",
+]
+
+ignore = [
+    # Line length handled by formatter
+    "E501",
+    # Module import not at top of file (sometimes needed for conditional imports)
+    "E402",
+    # Disable some overly strict docstring rules
+    "D100", # Missing docstring in public module
+    "D104", # Missing docstring in public package
+    "D107", # Missing docstring in __init__
+    # Allow implicit string concatenation for readability
+    "ISC001",
+    # Allow raising vanilla exceptions in some cases
+    "TRY003",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "D",      # Don't require docstrings in tests
+    "SLF001", # Allow private member access in tests
+    "PT011",  # Allow broad pytest.raises
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["agon"]
+force-sort-within-sections = true
+
+
+[tool.basedpyright]
+include = ["src", "tests"]
+executionEnvironments = [
+    { root = "tests", reportPrivateUsage = false, reportUnknownParameterType = false },
+    { root = "src" },
+]
+pythonVersion = "3.11"
+pythonPlatform = "All"
+
+# Core type checking settings
+typeCheckingMode = "strict"
+reportMissingTypeStubs = false
+reportUnknownVariableType = false
+reportUnknownArgumentType = false
+reportUnknownMemberType = false
+reportMissingParameterType = false
+reportUnnecessaryTypeIgnoreComment = true
+reportUnusedCallResult = false
+
+# External library adjustments
+reportAttributeAccessIssue = false
+reportOptionalMemberAccess = false
+
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=agon",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--cov-fail-under=85",
+]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+filterwarnings = [
+    "error",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning:pkg_resources.*",
+]
+
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.codespell]
+skip = "*.git,*.lock,*.json,__pycache__,*.pyc,*.egg-info,htmlcov,.coverage,coverage.xml"
