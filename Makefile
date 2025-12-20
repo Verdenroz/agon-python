@@ -17,7 +17,7 @@ test: test-unit
 	@echo "✅ All tests passed"
 
 test-unit: install
-	uv run pytest tests
+	uv run pytest tests -s
 
 nox:
 	uv run nox
