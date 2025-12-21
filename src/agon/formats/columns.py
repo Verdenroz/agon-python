@@ -1,4 +1,4 @@
-"""AGONColumns format codec.
+r"""AGONColumns format codec.
 
 AGONColumns is a columnar encoding that transposes data to group by column (type)
 instead of row. This provides better token efficiency for wide tables with
@@ -6,7 +6,7 @@ many columns of the same type.
 
 Format structure:
     @AGON columns
-    @D=<delimiter>  # optional, default: ,
+    @D=<delimiter>  # optional, default: \t
     <data>
 
 Example:
@@ -27,7 +27,7 @@ from agon.errors import AGONColumnsError
 from agon.formats.base import AGONFormat
 
 HEADER = "@AGON columns"
-DEFAULT_DELIMITER = ", "
+DEFAULT_DELIMITER = "\t"
 INDENT = "  "
 
 # Tree drawing characters

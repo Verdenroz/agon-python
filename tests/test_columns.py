@@ -43,6 +43,15 @@ class TestAGONColumnsBasic:
         decoded = AGONColumns.decode(encoded)
         assert decoded == data
 
+    def test_encode_falls_back_to_string_for_unknown_types(self) -> None:
+        class Custom:
+            def __str__(self) -> str:  # pragma: no cover
+                return "CUSTOM"
+
+        encoded = AGONColumns.encode({"x": Custom()})
+        decoded = AGONColumns.decode(encoded)
+        assert decoded == {"x": "CUSTOM"}
+
 
 class TestAGONColumnsColumnar:
     """Tests for columnar array encoding (uniform objects)."""
@@ -54,15 +63,13 @@ class TestAGONColumnsColumnar:
         assert "└" in encoded or "`" in encoded
 
     def test_decode_columnar_array(self) -> None:
-        payload = textwrap.dedent(
-            """\
-            @AGON columns
-
-            products[3]
-            ├ sku: A123, B456, C789
-            ├ name: Widget, Gadget, Gizmo
-            └ price: 9.99, 19.99, 29.99
-            """
+        payload = (
+            "@AGON columns\n"
+            "\n"
+            "products[3]\n"
+            "├ sku: A123\tB456\tC789\n"
+            "├ name: Widget\tGadget\tGizmo\n"
+            "└ price: 9.99\t19.99\t29.99\n"
         )
         decoded = AGONColumns.decode(payload)
         assert "products" in decoded
@@ -73,15 +80,13 @@ class TestAGONColumnsColumnar:
         assert products[2] == {"sku": "C789", "name": "Gizmo", "price": 29.99}
 
     def test_decode_columnar_array_unnamed(self) -> None:
-        payload = textwrap.dedent(
-            """\
-            @AGON columns
-
-            [3]
-            ├ sku: A123, B456, C789
-            ├ name: Widget, Gadget, Gizmo
-            └ price: 9.99, 19.99, 29.99
-            """
+        payload = (
+            "@AGON columns\n"
+            "\n"
+            "[3]\n"
+            "├ sku: A123\tB456\tC789\n"
+            "├ name: Widget\tGadget\tGizmo\n"
+            "└ price: 9.99\t19.99\t29.99\n"
         )
         decoded = AGONColumns.decode(payload)
         assert len(decoded) == 3
@@ -93,15 +98,13 @@ class TestAGONColumnsColumnar:
         assert decoded == simple_data
 
     def test_columnar_with_missing_values(self) -> None:
-        payload = textwrap.dedent(
-            """\
-            @AGON columns
-
-            users[3]
-            ├ id: 1, 2, 3
-            ├ name: Alice, Bob, Carol
-            └ email: alice@example.com, , carol@example.com
-            """
+        payload = (
+            "@AGON columns\n"
+            "\n"
+            "users[3]\n"
+            "├ id: 1\t2\t3\n"
+            "├ name: Alice\tBob\tCarol\n"
+            "└ email: alice@example.com\t\tcarol@example.com\n"
         )
         decoded = AGONColumns.decode(payload)
         users = decoded["users"]
@@ -119,20 +122,72 @@ class TestAGONColumnsColumnar:
         assert "└" not in encoded
 
     def test_decode_ascii_tree_chars(self) -> None:
-        payload = textwrap.dedent(
-            """\
-            @AGON columns
-
-            users[2]
-            | id: 1, 2
-            ` name: Alice, Bob
-            """
-        )
+        payload = "@AGON columns\n\nusers[2]\n| id: 1\t2\n` name: Alice\tBob\n"
         decoded = AGONColumns.decode(payload)
         users = decoded["users"]
         assert len(users) == 2
         assert users[0] == {"id": 1, "name": "Alice"}
         assert users[1] == {"id": 2, "name": "Bob"}
+
+    def test_decode_columnar_array_field_shorter_than_count(self) -> None:
+        payload = "@AGON columns\n\nusers[2]\n└ id: 1\n"
+        decoded = AGONColumns.decode(payload)
+        assert decoded == {"users": [{"id": 1}, {}]}
+
+    def test_decode_columnar_array_null_cell_means_present_none(self) -> None:
+        payload = "@AGON columns\n\nusers[2]\n└ email: null\t\n"
+        decoded = AGONColumns.decode(payload)
+        assert decoded == {"users": [{"email": None}, {}]}
+
+    def test_decode_columnar_array_escaped_quote_inside_cell(self) -> None:
+        payload = '@AGON columns\n\nitems[2]\n└ s: "a\\"b"\t"c"\n'
+        decoded = AGONColumns.decode(payload)
+        assert decoded == {"items": [{"s": 'a"b'}, {"s": "c"}]}
+
+
+class TestAGONColumnsQuotingRoundtrip:
+    """Roundtrip tests for quoting/unquoting strings in columns format."""
+
+    def test_roundtrip_strings_requiring_quotes(self) -> None:
+        data = [
+            {"s": "123"},
+            {"s": "null"},
+            {"s": "@hello"},
+            {"s": " spaced"},
+            {"s": "a\tb"},
+            {"s": r"a\\b"},
+            {"s": "a\nline"},
+            {"s": 'quote: "x"'},
+        ]
+        encoded = AGONColumns.encode(data)
+        decoded = AGONColumns.decode(encoded)
+        assert decoded == data
+
+
+class TestAGONColumnsDirectives:
+    """Tests for @D= delimiter directive parsing."""
+
+    def test_decode_custom_delimiter_declaration(self) -> None:
+        payload = '@AGON columns\n@D=\\n\n\nitems[1]\n└ s: "123"\n'
+        decoded = AGONColumns.decode(payload)
+        assert decoded == {"items": [{"s": "123"}]}
+
+    def test_decode_tab_delimiter_declaration(self) -> None:
+        payload = '@AGON columns\n@D=\\t\n\nitems[2]\n└ s: "a"\t"b"\n'
+        decoded = AGONColumns.decode(payload)
+        assert decoded == {"items": [{"s": "a"}, {"s": "b"}]}
+
+    def test_encode_emits_delimiter_declaration_for_non_default(self) -> None:
+        data = [{"id": 1}, {"id": 2}]
+        encoded = AGONColumns.encode(data, delimiter=",", use_ascii=True)
+        assert "@D=," in encoded
+        decoded = AGONColumns.decode(encoded)
+        assert decoded == data
+
+    def test_decode_custom_comma_delimiter_splits_quoted_values(self) -> None:
+        payload = '@AGON columns\n@D=,\n\nitems[2]\n└ s: "a,b","c"\n'
+        decoded = AGONColumns.decode(payload)
+        assert decoded == {"items": [{"s": "a,b"}, {"s": "c"}]}
 
 
 class TestAGONColumnsPrimitiveArrays:
@@ -144,13 +199,7 @@ class TestAGONColumnsPrimitiveArrays:
         assert "[3]:" in encoded
 
     def test_decode_primitive_array(self) -> None:
-        payload = textwrap.dedent(
-            """\
-            @AGON columns
-
-            tags[4]: admin, ops, dev, user
-            """
-        )
+        payload = "@AGON columns\n\ntags[4]: admin\tops\tdev\tuser\n"
         decoded = AGONColumns.decode(payload)
         assert decoded == {"tags": ["admin", "ops", "dev", "user"]}
 
@@ -186,6 +235,41 @@ class TestAGONColumnsMixedArrays:
         assert len(records) == 2
         assert records[0] == {"name": "Alice", "age": 30}
         assert records[1] == {"name": "Bob", "age": 25}
+
+    def test_decode_list_array_with_primitives(self) -> None:
+        payload = textwrap.dedent(
+            """\
+            @AGON columns
+
+            items[3]:
+              - 1
+              - null
+              - \"x\"
+            """
+        )
+        decoded = AGONColumns.decode(payload)
+        assert decoded == {"items": [1, None, "x"]}
+
+    def test_decode_list_array_skips_blank_and_comment_lines(self) -> None:
+        payload = textwrap.dedent(
+            """\
+            @AGON columns
+
+            items[2]:
+              # comment line
+              - 1
+
+              - 2
+            """
+        )
+        decoded = AGONColumns.decode(payload)
+        assert decoded == {"items": [1, 2]}
+
+    def test_roundtrip_list_item_object_with_nested_object(self) -> None:
+        data = {"items": [{"id": 1, "meta": {"tags": ["a", "b"], "flag": True}}]}
+        encoded = AGONColumns.encode(data)
+        decoded = AGONColumns.decode(encoded)
+        assert decoded == data
 
 
 class TestAGONColumnsPrimitives:
@@ -234,9 +318,10 @@ class TestAGONColumnsQuoting:
     """Tests for string quoting rules."""
 
     def test_quote_string_with_delimiter(self) -> None:
-        data = {"text": "hello, world"}
+        # Tab is the delimiter, so strings containing tabs need quoting
+        data = {"text": "hello\tworld"}
         encoded = AGONColumns.encode(data)
-        assert '"hello, world"' in encoded
+        assert '"hello\\tworld"' in encoded
 
     def test_quote_string_with_leading_space(self) -> None:
         data = {"text": " leading space"}
@@ -259,26 +344,29 @@ class TestAGONColumnsQuoting:
         decoded = AGONColumns.decode(encoded)
         assert decoded == data
 
+    def test_decode_quoted_string_with_unknown_escape(self) -> None:
+        payload = '@AGON columns\n\nv: "a\\q"\n'
+        decoded = AGONColumns.decode(payload)
+        assert decoded == {"v": "aq"}
+
+    def test_unquote_string_is_noop_for_unquoted_input(self) -> None:
+        from agon.formats.columns import _unquote_string
+
+        assert _unquote_string("abc") == "abc"
+
 
 class TestAGONColumnsDelimiters:
     """Tests for custom delimiters."""
 
-    def test_encode_with_tab_delimiter(self) -> None:
+    def test_encode_with_comma_delimiter(self) -> None:
+        # Tab is now the default, so test with comma to verify @D= is emitted
         data = [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]
-        encoded = AGONColumns.encode(data, delimiter="\t")
-        assert "@D=\\t" in encoded
+        encoded = AGONColumns.encode(data, delimiter=",")
+        assert "@D=," in encoded
 
     def test_decode_with_tab_delimiter(self) -> None:
-        payload = textwrap.dedent(
-            """\
-            @AGON columns
-            @D=\\t
-
-            users[2]
-            ├ id: 1\t2
-            └ name: Alice\tBob
-            """
-        )
+        # Tab is now the default, so no @D= needed
+        payload = "@AGON columns\n\nusers[2]\n├ id: 1\t2\n└ name: Alice\tBob\n"
         decoded = AGONColumns.decode(payload)
         users = decoded["users"]
         assert len(users) == 2
@@ -309,8 +397,8 @@ class TestAGONColumnsNesting:
         assert decoded == nested_data
 
 
-class TestAGONColumnsEdgeCases:
-    """Edge case tests."""
+class TestAGONColumnsEmptyAndStrings:
+    """Tests for empty values and string handling."""
 
     def test_empty_array(self) -> None:
         data = {"items": []}
@@ -354,6 +442,30 @@ class TestAGONColumnsEdgeCases:
         assert decoded == data
 
 
+class TestAGONColumnsArrays:
+    """Tests for array variants beyond pure columnar tables."""
+
+    def test_decode_primitive_array_empty_values(self) -> None:
+        payload = "@AGON columns\n\nnums[0]: \n"
+        decoded = AGONColumns.decode(payload)
+        assert decoded == {"nums": []}
+
+    def test_decode_list_array_item_with_nested_primitive_array(self) -> None:
+        payload = "@AGON columns\n\nitems[1]:\n  - id: 1\n    tags[2]: a\tb\n"
+        decoded = AGONColumns.decode(payload)
+        assert decoded == {"items": [{"id": 1, "tags": ["a", "b"]}]}
+
+    def test_decode_list_array_item_object_with_nested_object_value(self) -> None:
+        payload = "@AGON columns\n\nitems[1]:\n  - meta:\n      a: 1\n"
+        decoded = AGONColumns.decode(payload)
+        assert decoded == {"items": [{"meta": {"a": 1}}]}
+
+    def test_decode_list_array_item_object_missing_nested_value_becomes_empty_object(self) -> None:
+        payload = "@AGON columns\n\nitems[1]:\n  - meta:\n"
+        decoded = AGONColumns.decode(payload)
+        assert decoded == {"items": [{"meta": {}}]}
+
+
 class TestAGONColumnsIntegration:
     """Integration tests with AGON core."""
 
@@ -389,6 +501,16 @@ class TestAGONColumnsErrors:
         with pytest.raises(AGONColumnsError, match="Empty payload"):
             AGONColumns.decode("")
 
+    def test_cannot_parse_line_raises(self) -> None:
+        payload = "@AGON columns\n\n???\n"
+        with pytest.raises(AGONColumnsError, match=r"Cannot parse line"):
+            AGONColumns.decode(payload)
+
+    def test_array_header_without_tree_lines_raises(self) -> None:
+        payload = "@AGON columns\n\n[2]\nnot-a-tree\n"
+        with pytest.raises(AGONColumnsError, match=r"Cannot parse line"):
+            AGONColumns.decode(payload)
+
 
 class TestAGONColumnsHint:
     """Test hint method."""
@@ -410,8 +532,8 @@ class TestAGONColumnsTokenEfficiency:
             {"status": "active", "type": "admin"},
         ]
         encoded = AGONColumns.encode(data)
-        # Values should be grouped by column
-        assert "status: active, active, active" in encoded
+        # Values should be grouped by column (tab-separated)
+        assert "status: active\tactive\tactive" in encoded
         decoded = AGONColumns.decode(encoded)
         assert decoded == data
 
@@ -423,7 +545,8 @@ class TestAGONColumnsTokenEfficiency:
             {"price": 29.99, "qty": 30},
         ]
         encoded = AGONColumns.encode(data)
-        assert "price: 9.99, 19.99, 29.99" in encoded
-        assert "qty: 10, 20, 30" in encoded
+        # Values should be tab-separated
+        assert "price: 9.99\t19.99\t29.99" in encoded
+        assert "qty: 10\t20\t30" in encoded
         decoded = AGONColumns.decode(encoded)
         assert decoded == data
