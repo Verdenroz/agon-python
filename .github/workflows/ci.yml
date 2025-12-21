@@ -93,7 +93,7 @@ jobs:
         run: uv tool install nox
 
       - name: Download coverage data
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: coverage-data
 
