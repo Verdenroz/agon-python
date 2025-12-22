@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from agon.formats.base import AGONFormat
 from agon.formats.columns import AGONColumns
+from agon.formats.struct import AGONStruct
 from agon.formats.text import AGONText
 
-__all__ = ["AGONColumns", "AGONFormat", "AGONText"]
+__all__ = ["AGONColumns", "AGONFormat", "AGONStruct", "AGONText"]

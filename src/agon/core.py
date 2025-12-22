@@ -22,9 +22,9 @@ import orjson
 
 from agon.encoding import DEFAULT_ENCODING, count_tokens
 from agon.errors import AGONError
-from agon.formats import AGONColumns, AGONFormat, AGONText
+from agon.formats import AGONColumns, AGONFormat, AGONStruct, AGONText
 
-Format = Literal["auto", "json", "text", "columns"]
+Format = Literal["auto", "json", "text", "columns", "struct"]
 
 
 @dataclass(frozen=True)
@@ -45,6 +45,7 @@ class AGON:
         - "json": Raw JSON (baseline)
         - "text": AGONText row-based format
         - "columns": AGONColumns columnar format for wide tables
+        - "struct": AGONStruct template format for repeated object shapes
 
     Core ideas:
         - Key elimination: objects become positional rows with inline schema.
@@ -58,11 +59,13 @@ class AGON:
         "json": lambda data: orjson.dumps(data).decode(),
         "text": AGONText.encode,
         "columns": AGONColumns.encode,
+        "struct": AGONStruct.encode,
     }
 
     _decoders: ClassVar[dict[str, Callable[[str], Any]]] = {
         "@AGON text": AGONText.decode,
         "@AGON columns": AGONColumns.decode,
+        "@AGON struct": AGONStruct.decode,
     }
 
     @staticmethod
@@ -83,6 +86,7 @@ class AGON:
                 - "json": Raw JSON
                 - "text": AGONText row-based format
                 - "columns": AGONColumns columnar format for wide tables
+                - "struct": AGONStruct template format for repeated shapes
             force: If True with format="auto", always use a non-JSON format.
             min_savings: Minimum token savings ratio vs JSON to use non-JSON format.
             encoding: Tiktoken encoding for token counting (default: o200k_base).

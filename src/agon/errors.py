@@ -17,3 +17,7 @@ class AGONTextError(AGONError):
 
 class AGONColumnsError(AGONError):
     """Raised when AGONColumns encoding/decoding fails."""
+
+
+class AGONStructError(AGONError):
+    """Raised when AGONStruct encoding/decoding fails."""

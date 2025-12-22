@@ -13,7 +13,7 @@ import pytest
 import tiktoken
 
 from agon import AGON
-from agon.formats import AGONColumns, AGONText
+from agon.formats import AGONColumns, AGONStruct, AGONText
 
 # Path to test data
 DATA_DIR = Path(__file__).parent / "data"
@@ -97,6 +97,7 @@ def test_fixture_benchmark(fixture_path: Path) -> None:
     for fmt, encoder, decoder in [
         ("text", AGONText.encode, AGONText.decode),
         ("columns", AGONColumns.encode, AGONColumns.decode),
+        ("struct", AGONStruct.encode, AGONStruct.decode),
     ]:
         encoded = encoder(records)
         tokens = count_tokens(encoded)
