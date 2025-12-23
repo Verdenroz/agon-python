@@ -1,0 +1,197 @@
+{
+  "success": true,
+  "count": 5,
+  "scars": [
+    {
+      "id": "83db87c7-8a40-493c-aee7-b06a5626a710",
+      "title": "Use distinct representations for None vs empty string vs empty object",
+      "lesson": "In text formats, `key: ` (empty after colon) is ambiguous - could mean None, empty string, or start of nested object. Use explicit `null` for None, `\"\"` for empty string, and only use empty-after-colon for nested structures. Otherwise decoder can't distinguish and may return wrong type.",
+      "severity": "MAJOR",
+      "tier": "fresh",
+      "memory_type": "episodic",
+      "confidence": "50%",
+      "confidence_source": "solution_verified",
+      "match_score": 1.411,
+      "match_reasons": [
+        "moderate similarity (63%)",
+        "keyword match: for, object, return",
+        "language match",
+        "recent/fresh memory"
+      ],
+      "match_details": {
+        "similarity": 0.632,
+        "trigger_boost": 1.3,
+        "context_boost": 1.15,
+        "keyword_matches": [
+          "for",
+          "object",
+          "return",
+          "Encode"
+        ],
+        "error_code_matches": [],
+        "project_match": false,
+        "language_match": true,
+        "tag_matches": []
+      }
+    },
+    {
+      "id": "72340b0a-9e72-4486-9361-a0eebdd627f3",
+      "title": "Quote strings with leading/trailing whitespace for roundtrip",
+      "lesson": "Strings with leading or trailing whitespace must be quoted during encoding because decoders typically call `.strip()` on values. Without quoting, `\"Name \"` becomes `\"Name\"` after roundtrip. Add check: `if s != s.strip(): return quote(s)`",
+      "severity": "MODERATE",
+      "tier": "fresh",
+      "memory_type": "episodic",
+      "confidence": "50%",
+      "confidence_source": "solution_verified",
+      "match_score": 1.381,
+      "match_reasons": [
+        "moderate similarity (62%)",
+        "keyword match: for, return, python",
+        "language match",
+        "recent/fresh memory"
+      ],
+      "match_details": {
+        "similarity": 0.616,
+        "trigger_boost": 1.3,
+        "context_boost": 1.15,
+        "keyword_matches": [
+          "for",
+          "return",
+          "python"
+        ],
+        "error_code_matches": [],
+        "project_match": false,
+        "language_match": true,
+        "tag_matches": []
+      }
+    },
+    {
+      "id": "d09e1c17-86aa-47e2-98f2-58919e97d4e4",
+      "title": "Prefer clean, concise Python over verbose implementations",
+      "lesson": "Write clean, elegant Python code. Use Pydantic's native iteration (`for field, value in model`), walrus operators, and built-in features. Avoid verbose patterns like explicit field listing when iteration works. Trust Python's capabilities.",
+      "severity": "MODERATE",
+      "tier": "consolidated",
+      "memory_type": "semantic",
+      "confidence": "100%",
+      "confidence_source": "user_confirmed",
+      "match_score": 1.088,
+      "match_reasons": [
+        "moderate similarity (64%)",
+        "keyword match: py, Python, for",
+        "language match",
+        "recent/fresh memory",
+        "high confidence"
+      ],
+      "match_details": {
+        "similarity": 0.639,
+        "trigger_boost": 1.3,
+        "context_boost": 1.15,
+        "keyword_matches": [
+          "py",
+          "Python",
+          "for"
+        ],
+        "error_code_matches": [],
+        "project_match": false,
+        "language_match": true,
+        "tag_matches": []
+      }
+    },
+    {
+      "id": "f8d66345-4af2-49f1-90dc-1a99ece0b073",
+      "title": "Antipattern: Verbose if-checks for optional field appending",
+      "lesson": "When building text from optional Pydantic/dataclass fields, iterate over fields instead of manual if-checks. Use getattr() or model iteration to avoid repetitive conditionals.",
+      "severity": "MODERATE",
+      "tier": "consolidated",
+      "memory_type": "semantic",
+      "confidence": "100%",
+      "confidence_source": "user_confirmed",
+      "match_score": 1.07,
+      "match_reasons": [
+        "moderate similarity (61%)",
+        "keyword match: g, for, optional",
+        "language match",
+        "tag match: dataclass",
+        "recent/fresh memory",
+        "high confidence"
+      ],
+      "match_details": {
+        "similarity": 0.607,
+        "trigger_boost": 1.3,
+        "context_boost": 1.26,
+        "keyword_matches": [
+          "g",
+          "for",
+          "optional"
+        ],
+        "error_code_matches": [],
+        "project_match": false,
+        "language_match": true,
+        "tag_matches": [
+          "dataclass"
+        ]
+      }
+    },
+    {
+      "id": "1b8e4413-70ba-4194-b15e-5b4f021430ae",
+      "title": "Use __repr__ and __str__ for model self-formatting (clean architecture)",
+      "lesson": "Models should know how to format themselves. Implement `__repr__` and `__str__` methods on Pydantic models, then just call `repr(model)` or `str(model)` where needed. This is clean, follows single responsibility, and is more maintainable than external formatting logic.",
+      "severity": "MODERATE",
+      "tier": "consolidated",
+      "memory_type": "semantic",
+      "confidence": "100%",
+      "confidence_source": "user_confirmed",
+      "match_score": 0.96,
+      "match_reasons": [
+        "moderate similarity (62%)",
+        "keyword match: g, format, function",
+        "language match",
+        "recent/fresh memory",
+        "high confidence"
+      ],
+      "match_details": {
+        "similarity": 0.624,
+        "trigger_boost": 1.3,
+        "context_boost": 1.15,
+        "keyword_matches": [
+          "g",
+          "format",
+          "function"
+        ],
+        "error_code_matches": [],
+        "project_match": false,
+        "language_match": true,
+        "tag_matches": []
+      }
+    }
+  ],
+  "formatted_warning": "## PAST MISTAKES - REVIEW BEFORE PROCEEDING\n\n### [MAJOR] Use distinct representations for None vs empty string vs empty object\n**Lesson**: In text formats, `key: ` (empty after colon) is ambiguous - could mean None, empty string, or start of nested object. Use explicit `null` for None, `\"\"` for empty string, and only use empty-after-colon for nested structures. Otherwise decoder can't distinguish and may return wrong type.\n**Solution**: Encode None as \"null\" in key-value contexts, empty string as '\"\"' (quoted empty). Only use blank after colon when followed by indented nested content.\n*Confidence: 50% (verified) | Context: python, agon*\n\n### [MODERATE] Quote strings with leading/trailing whitespace for roundtrip\n**Lesson**: Strings with leading or trailing whitespace must be quoted during encoding because decoders typically call `.strip()` on values. Without quoting, `\"Name \"` becomes `\"Name\"` after roundtrip. Add check: `if s != s.strip(): return quote(s)`\n**Solution**: In _needs_quoting(), add: `if s != s.strip(): return True` to force quoting strings with leading/trailing whitespace.\n*Confidence: 50% (verified) | Context: python, agon*\n\n### [MODERATE] Prefer clean, concise Python over verbose implementations\n**Lesson**: Write clean, elegant Python code. Use Pydantic's native iteration (`for field, value in model`), walrus operators, and built-in features. Avoid verbose patterns like explicit field listing when iteration works. Trust Python's capabilities.\n**Solution**: Recognized that Pydantic BaseModel IS iterable. Kept the clean implementation using `for _, value in self:` pattern. Used `__repr__` and `__str__` methods for self-formatting. Single responsibility principle - models format themselves.\n*Confidence: 100% (verified) | Prevented: 4x | Context: python, scars*\n\n### [MODERATE] Antipattern: Verbose if-checks for optional field appending\n**Lesson**: When building text from optional Pydantic/dataclass fields, iterate over fields instead of manual if-checks. Use getattr() or model iteration to avoid repetitive conditionals.\n**Solution**: Use field iteration or dictionary comprehension to filter non-None/non-empty values, then format them programmatically\n*Confidence: 100% (verified) | Prevented: 2x | Context: python, scars*\n\n### [MODERATE] Use __repr__ and __str__ for model self-formatting (clean architecture)\n**Lesson**: Models should know how to format themselves. Implement `__repr__` and `__str__` methods on Pydantic models, then just call `repr(model)` or `str(model)` where needed. This is clean, follows single responsibility, and is more maintainable than external formatting logic.\n**Solution**: Keep formatting in the model via `__repr__` and `__str__`. Example: Scar uses `__repr__` for embedding representation, RetrievalQuery uses `__str__` for query formatting. Embedding generator just calls these methods. Clean separation of concerns.\n*Confidence: 100% (verified) | Prevented: 1x | Context: python, scars*\n\n---\n",
+  "feedback_reminder": "After using these scars, please provide feedback using reinforce_scar: feedback_type='helpful' if the advice prevented an error, 'irrelevant' if it didn't apply, or 'incorrect' if it was wrong.",
+  "pending_feedback": [
+    {
+      "scar_id": "83db87c7-8a40-493c-aee7-b06a5626a710",
+      "title": "Use distinct representations for None vs empty string vs empty object",
+      "is_speculative": false
+    },
+    {
+      "scar_id": "72340b0a-9e72-4486-9361-a0eebdd627f3",
+      "title": "Quote strings with leading/trailing whitespace for roundtrip",
+      "is_speculative": false
+    },
+    {
+      "scar_id": "d09e1c17-86aa-47e2-98f2-58919e97d4e4",
+      "title": "Prefer clean, concise Python over verbose implementations",
+      "is_speculative": false
+    },
+    {
+      "scar_id": "f8d66345-4af2-49f1-90dc-1a99ece0b073",
+      "title": "Antipattern: Verbose if-checks for optional field appending",
+      "is_speculative": false
+    },
+    {
+      "scar_id": "1b8e4413-70ba-4194-b15e-5b4f021430ae",
+      "title": "Use __repr__ and __str__ for model self-formatting (clean architecture)",
+      "is_speculative": false
+    }
+  ]
+}

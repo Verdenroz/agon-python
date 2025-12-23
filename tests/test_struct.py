@@ -246,6 +246,14 @@ class TestAGONStructArrays:
         decoded = AGONStruct.decode(encoded)
         assert decoded == data
 
+    def test_roundtrip_array_of_strings_with_colon(self) -> None:
+        # quoted strings containing ':' must not be parsed as
+        # inline key-value objects when they appear as list items.
+        data = ["keyword match: for, object, return", "language match"]
+        encoded = AGONStruct.encode(data)
+        decoded = AGONStruct.decode(encoded)
+        assert decoded == data
+
 
 class TestAGONStructEscaping:
     """Tests for value escaping."""

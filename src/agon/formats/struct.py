@@ -362,7 +362,8 @@ def _needs_quoting(s: str) -> bool:
     if s != s.strip():
         return True
     # Quote if contains special chars
-    return "," in s or "(" in s or ")" in s or "\\" in s or "\n" in s or '"' in s
+    # ':' is included to avoid ambiguity with inline key-value parsing in lists.
+    return "," in s or ":" in s or "(" in s or ")" in s or "\\" in s or "\n" in s or '"' in s
 
 
 def _quote_string(s: str) -> str:
@@ -854,6 +855,14 @@ def _decode_array(
             inst = _parse_struct_instance(content, registry)
             if inst is not None:
                 result.append(inst)
+                idx += 1
+                continue
+
+            # If this is a quoted string list item, treat it as a primitive.
+            # This avoids ambiguity with inline object syntax when the string
+            # contains ':' (e.g. "keyword match: foo").
+            if content.startswith('"') and content.endswith('"'):
+                result.append(_parse_primitive(content))
                 idx += 1
                 continue
 
