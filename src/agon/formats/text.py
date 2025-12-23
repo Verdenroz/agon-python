@@ -51,7 +51,7 @@ class AGONText(AGONFormat):
 
     @staticmethod
     def encode(
-        data: Any,
+        data: object,
         *,
         delimiter: str = DEFAULT_DELIMITER,
         include_header: bool = True,

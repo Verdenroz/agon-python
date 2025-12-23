@@ -470,24 +470,25 @@ class TestAGONColumnsIntegration:
     """Integration tests with AGON core."""
 
     def test_agon_encode_columns_format(self, simple_data: list[dict[str, Any]]) -> None:
-        encoded = AGON.encode(simple_data, format="columns")
-        assert "@AGON columns" in encoded
-
-    def test_agon_encode_with_format_columns(self, simple_data: list[dict[str, Any]]) -> None:
-        result = AGON.encode_with_format(simple_data, format="columns")
+        result = AGON.encode(simple_data, format="columns")
         assert result.format == "columns"
-        assert "@AGON columns" in result.text
+        assert result.header == "@AGON columns"
 
     def test_agon_decode_detects_columns_format(self, simple_data: list[dict[str, Any]]) -> None:
         encoded = AGONColumns.encode(simple_data)
         decoded = AGON.decode(encoded)
         assert decoded == simple_data
 
+    def test_agon_decode_encoding_directly(self, simple_data: list[dict[str, Any]]) -> None:
+        result = AGON.encode(simple_data, format="columns")
+        decoded = AGON.decode(result)
+        assert decoded == simple_data
+
     def test_agon_auto_includes_columns_in_candidates(
         self, simple_data: list[dict[str, Any]]
     ) -> None:
-        result = AGON.encode_with_format(simple_data, format="auto")
-        assert result.format in ("json", "text", "columns")
+        result = AGON.encode(simple_data, format="auto")
+        assert result.format in ("json", "text", "columns", "struct")
 
 
 class TestAGONColumnsErrors:

@@ -69,7 +69,7 @@ class AGONStruct(AGONFormat):
 
     @staticmethod
     def encode(
-        data: Any,
+        data: object,
         *,
         include_header: bool = True,
         min_occurrences: int = 3,
@@ -101,7 +101,10 @@ class AGONStruct(AGONFormat):
             lines.append(HEADER)
             lines.append("")
 
-            # Emit struct definitions
+        # Emit struct definitions even when headers are disabled.
+        # The header is used for auto-detect decoding, but LLM prompts need
+        # the struct templates to interpret instances like FR(v1, v2).
+        if struct_defs:
             for name, fields, optional, parents in struct_defs:
                 fields_str = ", ".join(f + "?" if f in optional else f for f in fields)
                 if parents:
@@ -110,8 +113,7 @@ class AGONStruct(AGONFormat):
                 else:
                     lines.append(f"@{name}: {fields_str}")
 
-            if struct_defs:
-                lines.append("")
+            lines.append("")
 
         _encode_value(data, lines, depth=0, registry=registry)
 
@@ -200,7 +202,7 @@ def _register_struct(
 
 
 def _detect_shapes(
-    data: Any,
+    data: object,
     shapes: Counter[tuple[str, ...]] | None = None,
 ) -> Counter[tuple[str, ...]]:
     """Detect repeated object shapes in data."""

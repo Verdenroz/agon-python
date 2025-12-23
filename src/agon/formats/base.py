@@ -17,6 +17,18 @@ class AGONFormat(ABC):
 
     @staticmethod
     @abstractmethod
+    def encode(data: object, *, include_header: bool = False) -> str:
+        """Encode data to this format."""
+        ...
+
+    @staticmethod
+    @abstractmethod
+    def decode(payload: str) -> object:
+        """Decode a payload in this format."""
+        ...
+
+    @staticmethod
+    @abstractmethod
     def hint() -> str:
         """Return a short hint describing this format for LLMs."""
         ...

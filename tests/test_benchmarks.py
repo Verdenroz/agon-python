@@ -117,12 +117,12 @@ def test_fixture_benchmark(fixture_path: Path) -> None:
         format_results[fmt] = (tokens, savings, encode_ms, decode_ms)
 
     # Test auto selection
-    result = AGON.encode_with_format(records, format="auto")
+    result = AGON.encode(records, format="auto")
     auto_tokens = count_tokens(result.text)
     auto_savings = (1 - auto_tokens / max(1, raw_tokens)) * 100
 
-    # Verify auto decode
-    decoded = AGON.decode(result.text)
+    # Verify auto decode (decode AGONEncoding directly)
+    decoded = AGON.decode(result)
     assert normalize_floats(decoded) == normalize_floats(records), "auto roundtrip failed"
 
     # Print results

@@ -13,7 +13,7 @@ Core features:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, ClassVar, Literal, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, cast, overload
 
 if TYPE_CHECKING:
     from collections.abc import Callable  # pragma: no cover
@@ -25,14 +25,44 @@ from agon.errors import AGONError
 from agon.formats import AGONColumns, AGONFormat, AGONStruct, AGONText
 
 Format = Literal["auto", "json", "text", "columns", "struct"]
+ConcreteFormat = Literal["json", "text", "columns", "struct"]
 
 
 @dataclass(frozen=True)
-class EncodingResult:
-    """Result of AGON encoding with format metadata."""
+class AGONEncoding:
+    r"""Result of AGON encoding with format metadata.
+
+    Use directly in LLM prompts - str() returns the encoded text.
+
+    Example:
+        >>> result = AGON.encode(data)
+        >>> prompt = f"Analyze this data:\\n{result}"  # uses __str__
+        >>> len(result)  # character count
+        >>> AGON.decode(response, format=result.format)
+    """
 
     format: Format
     text: str
+    header: str = ""
+
+    def __str__(self) -> str:
+        """Return encoded text for use in prompts."""
+        return self.text
+
+    def __len__(self) -> int:
+        """Return character count of encoded text."""
+        return len(self.text)
+
+    def __repr__(self) -> str:
+        """Return debug representation."""
+        preview = self.text[:50] + "..." if len(self.text) > 50 else self.text
+        return f"AGONEncoding(format={self.format!r}, len={len(self.text)}, text={preview!r})"
+
+    def with_header(self) -> str:
+        """Return encoded text with header prepended (for auto-detect decoding)."""
+        if not self.header:
+            return self.text
+        return f"{self.header}\n\n{self.text}"
 
 
 class AGON:
@@ -54,12 +84,20 @@ class AGON:
         - Self-describing: no training or config required.
     """
 
-    # Format registries
-    _encoders: ClassVar[dict[str, Callable[[Any], str]]] = {
+    # Format headers (for decoding)
+    _headers: ClassVar[dict[ConcreteFormat, str]] = {
+        "json": "",
+        "text": "@AGON text",
+        "columns": "@AGON columns",
+        "struct": "@AGON struct",
+    }
+
+    # Format registries (encode without headers - headers added separately)
+    _encoders: ClassVar[dict[ConcreteFormat, Callable[[Any], str]]] = {
         "json": lambda data: orjson.dumps(data).decode(),
-        "text": AGONText.encode,
-        "columns": AGONColumns.encode,
-        "struct": AGONStruct.encode,
+        "text": lambda data: AGONText.encode(data, include_header=False),
+        "columns": lambda data: AGONColumns.encode(data, include_header=False),
+        "struct": lambda data: AGONStruct.encode(data, include_header=False),
     }
 
     _decoders: ClassVar[dict[str, Callable[[str], Any]]] = {
@@ -70,17 +108,17 @@ class AGON:
 
     @staticmethod
     def encode(
-        data: Any,
+        data: object,
         *,
         format: Format = "auto",
         force: bool = False,
         min_savings: float = 0.10,
         encoding: str = DEFAULT_ENCODING,
-    ) -> str:
+    ) -> AGONEncoding:
         """Encode data to the most token-efficient AGON format.
 
         Args:
-            data: Data to encode. Any JSON-serializable value.
+            data: Data to encode. Must be JSON-serializable.
             format: Format to use:
                 - "auto": Select best format based on token count (default)
                 - "json": Raw JSON
@@ -92,58 +130,30 @@ class AGON:
             encoding: Tiktoken encoding for token counting (default: o200k_base).
 
         Returns:
-            Encoded string in the selected format.
+            EncodingResult containing:
+            - format: The format used
+            - text: Encoded data (send this to LLMs)
+            - header: Format header (for decoding with auto-detect)
 
         Example:
             >>> data = [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]
-            >>> AGON.encode(data, format="text")
+            >>> result = AGON.encode(data)
+            >>> response = send_to_llm(f"Analyze: {result}")  # uses __str__
+            >>> AGON.decode(response, result)  # decode using same format
         """
         # Direct format dispatch
-        if encoder := AGON._encoders.get(format):
-            return encoder(data)
-
-        # format == "auto": select best
-        candidates = [
-            (fmt, encoder(data))
-            for fmt, encoder in AGON._encoders.items()
-            if force is False or fmt != "json"
-        ]
-
-        # Select smallest token count
-        token_counts = [count_tokens(text, encoding=encoding) for _, text in candidates]
-        best_idx = min(range(len(candidates)), key=lambda i: token_counts[i])
-        best_format, best_text = candidates[best_idx]
-
-        # Apply min_savings threshold
-        if not force and best_format != "json":
-            json_idx = next(i for i, (fmt, _) in enumerate(candidates) if fmt == "json")
-            json_tokens = token_counts[json_idx]
-            savings = 1.0 - (token_counts[best_idx] / max(1, json_tokens))
-            if savings < min_savings:
-                return candidates[json_idx][1]
-
-        return best_text
-
-    @staticmethod
-    def encode_with_format(
-        data: Any,
-        *,
-        format: Format = "auto",
-        force: bool = False,
-        min_savings: float = 0.10,
-        encoding: str = DEFAULT_ENCODING,
-    ) -> EncodingResult:
-        """Encode data and return result with format metadata.
-
-        Same as encode() but returns an EncodingResult with format info.
-        """
-        # Direct format dispatch
-        if encoder := AGON._encoders.get(format):
-            return EncodingResult(format, encoder(data))
+        if format != "auto":
+            text = AGON._encoders[format](data)
+            header = AGON._headers[format]
+            return AGONEncoding(format, text, header)
 
         # format == "auto"
         candidates = [
-            EncodingResult(cast("Format", fmt), encoder(data))
+            AGONEncoding(
+                cast("Format", fmt),
+                encoder(data),
+                AGON._headers.get(fmt, ""),
+            )
             for fmt, encoder in AGON._encoders.items()
             if force is False or fmt != "json"
         ]
@@ -162,31 +172,64 @@ class AGON:
 
         return best
 
+    @overload
     @staticmethod
-    def decode(payload: str) -> Any:
+    def decode(payload: AGONEncoding) -> Any: ...
+
+    @overload
+    @staticmethod
+    def decode(payload: str, format: Format | None = None) -> Any: ...
+
+    @staticmethod
+    def decode(
+        payload: str | AGONEncoding,
+        format: Format | None = None,
+    ) -> Any:
         """Decode an AGON-encoded payload.
 
-        Automatically detects the format by prefix matching.
-
         Args:
-            payload: Encoded string in any AGON format.
+            payload: What to decode. Can be:
+                - AGONEncoding: Decode using its text and format
+                - str: Encoded string (use format param or auto-detect)
+            format: Format to use (only for str payload). If None, auto-detects.
 
         Returns:
             Decoded Python value.
 
         Raises:
             AGONError: If the payload is invalid.
+
+        Example:
+            >>> result = AGON.encode(data)
+            >>> AGON.decode(result)  # decode AGONEncoding directly
         """
-        payload = payload.strip()
+        if isinstance(payload, AGONEncoding):
+            format, payload = payload.format, payload.text
 
-        # Prefix-based decoder dispatch
-        for prefix, decoder in AGON._decoders.items():
-            if payload.startswith(prefix):
-                return decoder(payload)
+        text = payload.strip()
 
-        # Fallback: raw JSON
+        # Auto-detect from header prefix
+        if format is None or format == "auto":
+            for prefix, decoder in AGON._decoders.items():
+                if text.startswith(prefix):
+                    return decoder(text)
+            return AGON._decode_json(text)
+
+        # Dispatch by format
+        match format:
+            case "json":
+                return AGON._decode_json(text)
+            case "text" | "columns" | "struct":
+                header = AGON._headers[cast("ConcreteFormat", format)]
+                if not text.startswith(header):
+                    text = f"{header}\n\n{text}"
+                return AGON._decoders[header](text)
+
+    @staticmethod
+    def _decode_json(text: str) -> object:
+        """Decode JSON text."""
         try:
-            return orjson.loads(payload)
+            return orjson.loads(text)
         except orjson.JSONDecodeError as e:
             raise AGONError(f"Invalid JSON: {e}") from e
 

@@ -64,6 +64,18 @@ class TestAGONStructDetection:
         # Should have struct definition
         assert "@AGON struct" in encoded
 
+    def test_struct_definitions_emitted_without_header(self) -> None:
+        # Headerless encodes are used by AGON core by default, but the payload
+        # still needs struct templates so LLMs can interpret FR(v1, v2) instances.
+        data = {
+            "price": {"fmt": "100.00", "raw": 100.0},
+            "change": {"fmt": "+5.00", "raw": 5.0},
+            "volume": {"fmt": "1M", "raw": 1000000},
+        }
+        encoded = AGONStruct.encode(data, include_header=False)
+        assert "@AGON struct" not in encoded
+        assert "@FR: fmt, raw" in encoded
+
     def test_no_struct_for_single_occurrence(self) -> None:
         data = {"price": {"fmt": "100", "raw": 100}}
         encoded = AGONStruct.encode(data, min_occurrences=3)

@@ -449,24 +449,25 @@ class TestAGONTextIntegration:
     """Integration tests with AGON core."""
 
     def test_agon_encode_text_format(self, simple_data: list[dict[str, Any]]) -> None:
-        encoded = AGON.encode(simple_data, format="text")
-        assert "@AGON text" in encoded
-
-    def test_agon_encode_with_format_text(self, simple_data: list[dict[str, Any]]) -> None:
-        result = AGON.encode_with_format(simple_data, format="text")
+        result = AGON.encode(simple_data, format="text")
         assert result.format == "text"
-        assert "@AGON text" in result.text
+        assert result.header == "@AGON text"
 
     def test_agon_decode_detects_text_format(self, simple_data: list[dict[str, Any]]) -> None:
         encoded = AGONText.encode(simple_data)
         decoded = AGON.decode(encoded)
         assert decoded == simple_data
 
+    def test_agon_decode_encoding_directly(self, simple_data: list[dict[str, Any]]) -> None:
+        result = AGON.encode(simple_data, format="text")
+        decoded = AGON.decode(result)
+        assert decoded == simple_data
+
     def test_agon_auto_includes_text_in_candidates(self, simple_data: list[dict[str, Any]]) -> None:
         # Encode with auto should consider text format
-        result = AGON.encode_with_format(simple_data, format="auto")
+        result = AGON.encode(simple_data, format="auto")
         # Result could be any format, but text should have been considered
-        assert result.format in ("json", "text", "columns")
+        assert result.format in ("json", "text", "columns", "struct")
 
 
 class TestAGONTextErrors:

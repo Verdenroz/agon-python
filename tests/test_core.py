@@ -17,24 +17,38 @@ from agon.formats.text import AGONText
 
 def test_encode_json_format_returns_json() -> None:
     data: dict[str, Any] = {"a": 1, "b": [1, 2, 3]}
-    encoded = AGON.encode(data, format="json")
-    assert orjson.loads(encoded) == data
+    result = AGON.encode(data, format="json")
+    assert orjson.loads(result.text) == data
 
 
 def test_encode_text_format_uses_header() -> None:
     data: dict[str, Any] = {"a": 1, "b": "x"}
-    encoded = AGON.encode(data, format="text")
-    assert encoded.startswith("@AGON text")
+    result = AGON.encode(data, format="text")
+    assert result.format == "text"
+    assert result.header == "@AGON text"
 
 
-def test_encode_with_format_routes_to_specific_formats(simple_data: list[dict[str, Any]]) -> None:
-    res_json = AGON.encode_with_format(simple_data, format="json")
+def test_encode_routes_to_specific_formats(simple_data: list[dict[str, Any]]) -> None:
+    res_json = AGON.encode(simple_data, format="json")
     assert res_json.format == "json"
     assert isinstance(orjson.loads(res_json.text), list)
 
-    res_text = AGON.encode_with_format(simple_data, format="text")
+    res_text = AGON.encode(simple_data, format="text")
     assert res_text.format == "text"
-    assert res_text.text.startswith("@AGON text")
+    assert res_text.header == "@AGON text"
+
+
+def test_encode_struct_includes_definitions_without_header() -> None:
+    data = {
+        "price": {"fmt": "100.00", "raw": 100.0},
+        "change": {"fmt": "+5.00", "raw": 5.0},
+        "volume": {"fmt": "1M", "raw": 1000000},
+    }
+    result = AGON.encode(data, format="struct")
+    assert result.format == "struct"
+    assert result.header == "@AGON struct"
+    assert "@AGON struct" not in result.text
+    assert "@FR: fmt, raw" in result.text
 
 
 def test_decode_detects_text_payload() -> None:
@@ -55,6 +69,24 @@ def test_decode_invalid_json_raises() -> None:
 def test_decode_invalid_non_json_string_raises() -> None:
     with pytest.raises(AGONError, match="Invalid JSON"):
         AGON.decode("this is not json and not AGON")
+
+
+def test_decode_agon_encoding_directly() -> None:
+    """Test decoding AGONEncoding directly."""
+    data = [{"id": 1, "name": "Alice"}]
+    result = AGON.encode(data, format="text")
+    # Decode AGONEncoding directly
+    decoded = AGON.decode(result)
+    assert decoded == data
+
+
+def test_decode_with_format_parameter() -> None:
+    """Test decoding with explicit format (no header needed)."""
+    data = [{"id": 1, "name": "Alice"}]
+    result = AGON.encode(data, format="text")
+    # Decode using format parameter
+    decoded = AGON.decode(result.text, format=result.format)
+    assert decoded == data
 
 
 def test_project_data_delegates() -> None:
@@ -119,14 +151,14 @@ def test_project_missing_key_ignored() -> None:
 def test_auto_format_selects_best() -> None:
     """Auto format should choose most token-efficient option."""
     data: list[dict[str, Any]] = [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]
-    result = AGON.encode_with_format(data, format="auto")
-    assert result.format in ("json", "text")
+    result = AGON.encode(data, format="auto")
+    assert result.format in ("json", "text", "columns", "struct")
 
 
 def test_force_skips_json() -> None:
     """With force=True, auto should not select JSON."""
     data: dict[str, Any] = {"a": 1}
-    result = AGON.encode_with_format(data, format="auto", force=True)
+    result = AGON.encode(data, format="auto", force=True)
     assert result.format == "text"
 
 
@@ -135,31 +167,65 @@ def test_auto_min_savings_can_fall_back_to_json() -> None:
     # then force an impossible savings threshold so it must fall back.
     records = [{"id": i, "name": "Alice"} for i in range(60)]
 
-    out = AGON.encode(records, format="auto", min_savings=1.0)
-    assert out.startswith("[")
+    result = AGON.encode(records, format="auto", min_savings=1.0)
+    assert result.format == "json"
+    assert result.text.startswith("[")
 
 
 def test_auto_min_savings_allows_best_format_when_threshold_met() -> None:
     # Ensure we cover the non-fallback path of min_savings logic.
     records = [{"id": i, "name": "Alice"} for i in range(60)]
 
-    out = AGON.encode(records, format="auto", min_savings=0.0)
-    assert out.startswith("@AGON ")
+    result = AGON.encode(records, format="auto", min_savings=0.0)
+    assert result.format != "json"
 
 
 def test_auto_force_excludes_json_candidate() -> None:
     records = [{"id": i, "name": "Alice"} for i in range(5)]
 
-    out = AGON.encode(records, format="auto", force=True)
-    assert out.startswith("@AGON ")
+    result = AGON.encode(records, format="auto", force=True)
+    assert result.format != "json"
 
 
-def test_encode_with_format_reports_json_fallback() -> None:
+def test_encode_reports_json_fallback() -> None:
     records = [{"id": i, "name": "Alice"} for i in range(60)]
 
-    res = AGON.encode_with_format(records, format="auto", min_savings=1.0)
+    res = AGON.encode(records, format="auto", min_savings=1.0)
     assert res.format == "json"
     assert res.text.startswith("[")
+
+
+def test_agon_encoding_str_returns_text() -> None:
+    """AGONEncoding str() returns the encoded text."""
+    data = [{"id": 1}]
+    result = AGON.encode(data, format="json")
+    assert str(result) == result.text
+
+
+def test_agon_encoding_len_returns_text_length() -> None:
+    """AGONEncoding len() returns character count."""
+    data = [{"id": 1}]
+    result = AGON.encode(data, format="json")
+    assert len(result) == len(result.text)
+
+
+def test_agon_encoding_repr() -> None:
+    """AGONEncoding has useful repr."""
+    data = [{"id": 1}]
+    result = AGON.encode(data, format="json")
+    r = repr(result)
+    assert "AGONEncoding" in r
+    assert "json" in r
+
+
+def test_agon_encoding_with_header() -> None:
+    """with_header() prepends header for auto-detect decoding."""
+    data = [{"id": 1, "name": "Alice"}]
+    result = AGON.encode(data, format="text")
+    with_header = result.with_header()
+    assert with_header.startswith("@AGON text")
+    # Can decode with auto-detect
+    assert AGON.decode(with_header) == data
 
 
 def test_project_data_handles_nested_paths_and_ignores_empty() -> None:
