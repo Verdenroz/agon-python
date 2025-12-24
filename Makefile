@@ -3,7 +3,7 @@
 
 .DEFAULT_GOAL := default
 
-.PHONY: default install fix test test-unit nox nox-unit upgrade build clean help
+.PHONY: default install fix test nox upgrade build docs clean pre-commit help
 
 default: install fix test
 
@@ -13,26 +13,21 @@ install:
 fix:
 	uv run python devtools/lint.py
 
-test: test-unit
-	@echo "✅ All tests passed"
-
-test-unit: install
+test: install
 	uv run pytest tests -s
+	@echo "✅ All tests passed"
 
 nox:
 	uv run nox
-
-nox-unit:
-	uv run nox -s unit
-
-nox-lint:
-	uv run nox -s lint
 
 upgrade:
 	uv sync --upgrade --dev
 
 build:
 	uv build
+
+docs: install
+	uv run mkdocs serve
 
 clean:
 	-rm -rf dist/
@@ -76,3 +71,6 @@ help:
 	@echo ""
 	@echo "🔧 Build:"
 	@echo "  make build         - Build distribution packages"
+	@echo ""
+	@echo "📚 Docs:"
+	@echo "  make docs          - Serve docs locally (http://127.0.0.1:8000/)"

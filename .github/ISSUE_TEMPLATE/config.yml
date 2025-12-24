@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Questions & Discussions
-    url: https://github.com/Verdenroz/agon/discussions
+    url: https://github.com/Verdenroz/agon-python/discussions
     about: Ask questions and discuss ideas in GitHub Discussions
   - name: Documentation
-    url: https://github.com/Verdenroz/agon#readme
+    url: https://github.com/Verdenroz/agon-python#readme
     about: Check the documentation for usage examples
