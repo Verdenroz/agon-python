@@ -213,6 +213,12 @@ omit = [
     "*/__pycache__/*",
 ]
 
+[tool.coverage.paths]
+source = [
+    "src/",
+    ".nox/*/lib/python*/site-packages/",
+]
+
 [tool.coverage.report]
 exclude_lines = [
     "pragma: no cover",

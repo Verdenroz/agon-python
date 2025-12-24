@@ -34,6 +34,8 @@ def unit(session: nox.Session) -> None:
 def coverage(session: nox.Session) -> None:
     """Generate coverage report."""
     session.install("coverage[toml]")
+    # Combine coverage data and apply path mappings
+    session.run("coverage", "combine", "--keep", success_codes=[0, 1])
     if session.posargs and session.posargs[0] == "xml":
         session.run("coverage", "xml")
     else:
