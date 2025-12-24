@@ -1,0 +1,72 @@
+site_name: AGON
+site_description: Adaptive Guarded Object Notation — token-efficient, self-describing JSON encodings for LLM prompts.
+repo_url: https://github.com/Verdenroz/agon-python
+repo_name: Verdenroz/agon-python
+
+theme:
+  name: material
+  font:
+    text: Inter
+    code: JetBrains Mono
+  palette:
+    - scheme: default
+      primary: lime
+      accent: deep purple
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: lime
+      accent: deep purple
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - toc.follow
+    - toc.integrate
+
+nav:
+  - Home: index.md
+  - Concepts: concepts.md
+  - API: api.md
+  - Formats:
+      - JSON: formats/json.md
+      - Text: formats/text.md
+      - Columns: formats/columns.md
+      - Struct: formats/struct.md
+  - Benchmarks: benchmarks.md
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/chart.js@4
+  - javascripts/charts.js

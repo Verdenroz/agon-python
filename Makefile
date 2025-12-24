@@ -27,7 +27,7 @@ build:
 	uv build
 
 docs: install
-	uv run mkdocs serve
+	uv run mkdocs serve --livereload
 
 clean:
 	-rm -rf dist/

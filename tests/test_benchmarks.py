@@ -13,7 +13,6 @@ import pytest
 import tiktoken
 
 from agon import AGON
-from agon.formats import AGONColumns, AGONStruct, AGONText
 
 # Path to test data
 DATA_DIR = Path(__file__).parent / "data"
@@ -38,22 +37,32 @@ def iter_json_fixtures() -> list[Path]:
     return sorted(DATA_DIR.glob("*.json"), key=lambda p: p.name)
 
 
-def coerce_records(obj: Any, *, filename: str) -> tuple[list[dict[str, Any]], str]:
-    """Coerce an arbitrary JSON fixture into list[dict] for AGON.
+def coerce_records(obj: Any, *, filename: str) -> tuple[Any, str]:
+    """Coerce an arbitrary JSON fixture into encodable format for AGON.
 
     - If fixture is already list[dict], use it.
     - If fixture is a dict and contains a known record-list key (candles/quotes), use that.
+    - If fixture is a dict with nested arrays/objects, encode it directly (don't wrap).
     - Otherwise, wrap the dict as a single record.
     """
     if isinstance(obj, list) and all(isinstance(x, dict) for x in obj):
         return obj, f"{filename}"
 
     if isinstance(obj, dict):
+        # Check for known record-list keys
         for key in ("candles", "quotes", "records", "items", "data"):
             val = obj.get(key)
             if isinstance(val, list) and (not val or all(isinstance(x, dict) for x in val)):
                 return val, f"{filename}:{key}"
-        return [obj], f"{filename} (wrapped)"
+
+        # If dict contains nested structures (arrays/objects), encode it directly
+        # This avoids wrapping well-structured objects like toon.json in a list
+        has_nested = any(isinstance(v, dict | list) for v in obj.values())
+        if has_nested:
+            return obj, f"{filename}"
+
+        # Simple flat dict - wrap as single record
+        return [obj], f"{filename}"
 
     raise TypeError(f"Unsupported fixture shape for {filename}: {type(obj).__name__}")
 
@@ -86,7 +95,8 @@ def test_fixture_benchmark(fixture_path: Path) -> None:
     obj = load_json(fixture_path.name)
     records, label = coerce_records(obj, filename=fixture_path.name)
 
-    raw_json = orjson.dumps(records).decode()
+    # Use pretty JSON as baseline (more realistic comparison)
+    raw_json = orjson.dumps(records, option=orjson.OPT_INDENT_2).decode()
     raw_tokens = count_tokens(raw_json)
 
     # Test each format individually
@@ -95,12 +105,12 @@ def test_fixture_benchmark(fixture_path: Path) -> None:
     ] = {}  # tokens, savings, encode_ms, decode_ms
 
     for fmt, encoder, decoder in [
-        ("text", AGONText.encode, AGONText.decode),
-        ("columns", AGONColumns.encode, AGONColumns.decode),
-        ("struct", AGONStruct.encode, AGONStruct.decode),
+        ("text", lambda data: AGON.encode(data, format="text"), AGON.decode),  # type: ignore[misc]
+        ("columns", lambda data: AGON.encode(data, format="columns"), AGON.decode),  # type: ignore[misc]
+        ("struct", lambda data: AGON.encode(data, format="struct"), AGON.decode),  # type: ignore[misc]
     ]:
         encoded = encoder(records)
-        tokens = count_tokens(encoded)
+        tokens = count_tokens(encoded.text)
         savings = (1 - tokens / max(1, raw_tokens)) * 100
 
         t0 = time.perf_counter()
@@ -108,7 +118,7 @@ def test_fixture_benchmark(fixture_path: Path) -> None:
         encode_ms = (time.perf_counter() - t0) * 1000
 
         t0 = time.perf_counter()
-        decoded = decoder(encoded)
+        decoded = decoder(encoded.with_header())
         decode_ms = (time.perf_counter() - t0) * 1000
 
         # Verify roundtrip
@@ -126,10 +136,11 @@ def test_fixture_benchmark(fixture_path: Path) -> None:
     assert normalize_floats(decoded) == normalize_floats(records), "auto roundtrip failed"
 
     # Print results
+    record_count = len(records) if isinstance(records, list) else 1
     print(f"\n{'=' * 60}")
     print(f"FIXTURE: {label}")
-    print(f"Bytes: {fixture_path.stat().st_size:,}  Records: {len(records):,}")
-    print(f"JSON baseline: {raw_tokens:,} tokens")
+    print(f"Bytes: {fixture_path.stat().st_size:,}  Records: {record_count:,}")
+    print(f"JSON baseline (pretty): {raw_tokens:,} tokens")
     print(f"{'-' * 60}")
     print(f"{'Format':<10} {'Tokens':>8} {'Savings':>10} {'Encode':>10} {'Decode':>10}")
     print(f"{'-' * 60}")

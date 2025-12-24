@@ -94,10 +94,65 @@ def test_project_data_delegates() -> None:
     assert AGON.project_data(data, ["id"]) == [{"id": 1}]
 
 
-def test_hint_returns_string() -> None:
-    hint = AGON.hint()
+def test_hint_with_agon_encoding_result() -> None:
+    """hint() should accept AGONEncoding and return prescriptive generation instructions."""
+    data = [{"id": 1, "name": "Alice"}]
+    result = AGON.encode(data, format="text")
+    hint = AGON.hint(result)
     assert isinstance(hint, str)
-    assert hint
+    assert "Return in AGON text format" in hint
+    assert "@AGON text header" in hint
+
+
+def test_hint_with_format_string_text() -> None:
+    """hint() should accept format string and return generation instructions."""
+    hint = AGON.hint("text")
+    assert isinstance(hint, str)
+    assert "Return in AGON text format" in hint
+    assert "@AGON text header" in hint
+    assert "name[N]{fields}" in hint
+
+
+def test_hint_with_format_string_columns() -> None:
+    """hint() should return prescriptive columns format instructions."""
+    hint = AGON.hint("columns")
+    assert isinstance(hint, str)
+    assert "Return in AGON columns format" in hint
+    assert "@AGON columns header" in hint
+    assert "├/└" in hint
+
+
+def test_hint_with_format_string_struct() -> None:
+    """hint() should return prescriptive struct format instructions."""
+    hint = AGON.hint("struct")
+    assert isinstance(hint, str)
+    assert "Return in AGON struct format" in hint
+    assert "@AGON struct header" in hint
+    assert "@Struct" in hint or "Struct(" in hint
+
+
+def test_hint_with_format_string_json() -> None:
+    """hint() should return JSON format hint."""
+    hint = AGON.hint("json")
+    assert isinstance(hint, str)
+    assert "JSON" in hint
+
+
+def test_hint_with_unknown_format_raises() -> None:
+    """hint() should raise AGONError for unknown format."""
+    with pytest.raises(AGONError, match="Unknown format"):
+        AGON.hint("invalid_format")  # type: ignore[arg-type]
+
+
+def test_hint_matches_encoding_format() -> None:
+    """hint() should return matching hint for different encoded formats."""
+    data = [{"id": 1, "name": "Alice"}]
+
+    for fmt in ["text", "columns", "struct", "json"]:
+        result = AGON.encode(data, format=fmt)  # type: ignore[arg-type]
+        hint_from_result = AGON.hint(result)
+        hint_from_string = AGON.hint(fmt)  # type: ignore[arg-type]
+        assert hint_from_result == hint_from_string
 
 
 def test_count_tokens_positive() -> None:
