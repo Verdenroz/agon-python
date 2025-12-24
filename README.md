@@ -2,7 +2,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/agon-python.svg)](https://pypi.org/project/agon-python/)
 [![Python versions](https://img.shields.io/pypi/pyversions/agon-python.svg)](https://pypi.org/project/agon-python/)
-[![License](https://img.shields.io/pypi/l/agon-python.svg)](https://github.com/Verdenroz/agon-python/blob/master/LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/Verdenroz/agon-python/actions/workflows/ci.yml/badge.svg)](https://github.com/Verdenroz/agon-python/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/Verdenroz/agon-python/branch/master/graph/badge.svg)](https://codecov.io/gh/Verdenroz/agon-python)
 
@@ -418,6 +418,8 @@ uv run pre-commit install
 ```
 
 ## Documentation
+
+Full documentation is available at [https://Verdenroz.github.io/agon-python/](https://Verdenroz.github.io/agon-python/)
 
 This repo includes an MkDocs site under `docs/`.
 
