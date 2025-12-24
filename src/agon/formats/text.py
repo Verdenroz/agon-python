@@ -4,12 +4,12 @@ AGONText is a row-based encoding with radical simplicity.
 It uses indentation for hierarchy and tabular format for arrays of objects.
 
 Format structure:
-    @AGON text v1
+    @AGON text
     @D=<delimiter>  # optional, default: \t
     <data>
 
 Example:
-    @AGON text v1
+    @AGON text
 
     products[3]{sku	name	price}
     A123	Widget	9.99
@@ -46,8 +46,8 @@ class AGONText(AGONFormat):
 
     @staticmethod
     def hint() -> str:
-        """Return a short hint describing this format for LLMs."""
-        return "AGON text: key:value pairs, arrays as name[N]{fields} with rows"
+        """Return a short hint instructing LLMs how to generate this format."""
+        return "Return in AGON text format: Start with @AGON text header, encode arrays as name[N]{fields} with tab-delimited rows"
 
     @staticmethod
     def encode(
@@ -61,7 +61,7 @@ class AGONText(AGONFormat):
         Args:
             data: JSON-serializable data to encode.
             delimiter: Field delimiter for tabular data (default: tab).
-            include_header: Whether to include @AGON text v1 header.
+            include_header: Whether to include @AGON text header.
 
         Returns:
             AGONText encoded string.
@@ -207,7 +207,7 @@ def _encode_primitive(val: Any, delimiter: str) -> str:
         return "null"
     if isinstance(val, bool):
         return "true" if val else "false"
-    if isinstance(val, (int, float)):
+    if isinstance(val, int | float):
         # Handle special float values
         if isinstance(val, float):
             if val != val:  # NaN
@@ -272,7 +272,7 @@ def _is_uniform_array(arr: list[Any]) -> tuple[bool, list[str]]:
     # Check all objects have only primitive values
     for obj in arr:
         for v in obj.values():
-            if isinstance(v, (dict, list)):
+            if isinstance(v, dict | list):
                 return False, []
 
     # Return keys in consistent order (first seen order from union)
@@ -287,7 +287,7 @@ def _is_uniform_array(arr: list[Any]) -> tuple[bool, list[str]]:
 
 def _is_primitive_array(arr: list[Any]) -> bool:
     """Check if array contains only primitives."""
-    return all(not isinstance(x, (dict, list)) for x in arr)
+    return all(not isinstance(x, dict | list) for x in arr)
 
 
 def _encode_value(
@@ -300,7 +300,7 @@ def _encode_value(
     """Encode a value, appending lines."""
     indent = INDENT * depth
 
-    if val is None or isinstance(val, (bool, int, float, str)):
+    if val is None or isinstance(val, bool | int | float | str):
         # Primitive value
         if name:
             lines.append(f"{indent}{name}: {_encode_primitive(val, delimiter)}")
@@ -401,7 +401,7 @@ def _encode_list_item_object(
             # Nested object
             lines.append(f"{prefix}{k}:")
             for nk, nv in v.items():
-                if isinstance(nv, (dict, list)):
+                if isinstance(nv, dict | list):
                     _encode_value(nv, lines, depth + 2, delimiter, nk)
                 else:
                     lines.append(f"{indent}    {nk}: {_encode_primitive(nv, delimiter)}")

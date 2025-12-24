@@ -64,8 +64,8 @@ class AGONStruct(AGONFormat):
 
     @staticmethod
     def hint() -> str:
-        """Return a short hint describing this format for LLMs."""
-        return "AGON struct: @Struct: fields defines templates, Struct(v1, v2) instantiates"
+        """Return a short hint instructing LLMs how to generate this format."""
+        return "Return in AGON struct format: Start with @AGON struct header, define templates as @Struct: fields, instantiate as Struct(v1, v2)"
 
     @staticmethod
     def encode(
@@ -212,7 +212,7 @@ def _detect_shapes(
     if isinstance(data, dict):
         # Only count shapes with primitive values
         primitive_keys: tuple[str, ...] = tuple(
-            sorted(k for k, v in data.items() if not isinstance(v, (dict, list)))
+            sorted(k for k, v in data.items() if not isinstance(v, dict | list))
         )
         if len(primitive_keys) >= 2:
             shapes[primitive_keys] += 1
@@ -322,7 +322,7 @@ def _can_use_struct(obj: dict[str, Any], fields: list[str], optional: set[str]) 
     """Check if an object can be encoded as a struct instance."""
     # Object must have only primitive values
     for v in obj.values():
-        if isinstance(v, (dict, list)):
+        if isinstance(v, dict | list):
             return False
 
     # All required fields must be present
@@ -385,7 +385,7 @@ def _encode_primitive(val: Any, *, for_struct_instance: bool = False) -> str:
         return "" if for_struct_instance else "null"
     if isinstance(val, bool):
         return "true" if val else "false"
-    if isinstance(val, (int, float)):
+    if isinstance(val, int | float):
         if isinstance(val, float):
             if val != val:  # NaN
                 return "" if for_struct_instance else "null"
@@ -466,7 +466,7 @@ def _encode_value(
     """Encode a value, appending lines."""
     indent = INDENT * depth
 
-    if val is None or isinstance(val, (bool, int, float, str)):
+    if val is None or isinstance(val, bool | int | float | str):
         lines.append(f"{indent}{_encode_primitive(val)}")
         return
 

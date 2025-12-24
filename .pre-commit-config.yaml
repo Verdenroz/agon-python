@@ -23,11 +23,14 @@ repos:
         args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
 
-  - repo: https://github.com/DetachHead/basedpyright
-    rev: v1.29.1
+  - repo: local
     hooks:
       - id: basedpyright
-        additional_dependencies: [tiktoken]
+        name: basedpyright (uv)
+        entry: uv run basedpyright
+        language: system
+        args: [src]
+        pass_filenames: false
 
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.1

@@ -256,16 +256,48 @@ class AGON:
         return AGONFormat.project_data(data, keep_paths)
 
     @staticmethod
-    def hint() -> str:
-        """Optional short hint for LLMs about AGON format.
+    def hint(result_or_format: AGONEncoding | ConcreteFormat) -> str:
+        """Get a prescriptive hint instructing LLMs how to generate AGON format.
 
-        Most LLMs can understand AGON without any hint since it's self-describing.
-        This hint is ~24 tokens vs ~100+ tokens for traditional schema prompts.
+        NOTE: LLMs have not been trained on AGON, so generation accuracy cannot
+        be guaranteed. Use hints when asking LLMs to return AGON-formatted data,
+        but validate the output. Prefer sending AGON to LLMs (reliable) over
+        asking LLMs to generate AGON (experimental).
+
+        Args:
+            result_or_format: AGONEncoding result or format name ("text", "columns",
+                "struct", "json"). Returns generation instructions for that format.
 
         Returns:
-            A short hint string.
+            A short prescriptive hint instructing how to generate the format.
+
+        Example:
+            >>> result = AGON.encode(data, format="auto")
+            >>> AGON.hint(result)  # Generation instruction for selected format
+            'Return in AGON text format: Start with @AGON text header, encode arrays as name[N]{fields} with tab-delimited rows'
+            >>> AGON.hint("columns")  # Generation instruction for columns format
+            'Return in AGON columns format: Start with @AGON columns header, transpose arrays to name[N] with ├/└ field: val1, val2, ...'
         """
-        return AGONText.hint()
+        # Extract format if AGONEncoding was passed
+        format_name = (
+            result_or_format.format
+            if isinstance(result_or_format, AGONEncoding)
+            else result_or_format
+        )
+
+        # Return hint for specific format
+        match format_name:
+            case "text":
+                return AGONText.hint()
+            case "columns":
+                return AGONColumns.hint()
+            case "struct":
+                return AGONStruct.hint()
+            case "json":
+                return "JSON: Standard compact JSON encoding"
+            case _:
+                msg = f"Unknown format: {format_name}"
+                raise AGONError(msg)
 
     @staticmethod
     def count_tokens(text: str, *, encoding: str = DEFAULT_ENCODING) -> int:

@@ -53,8 +53,8 @@ class AGONColumns(AGONFormat):
 
     @staticmethod
     def hint() -> str:
-        """Return a short hint describing this format for LLMs."""
-        return "AGON columns: arrays as name[N] with ├/└ field: val1, val2, ..."
+        """Return a short hint instructing LLMs how to generate this format."""
+        return "Return in AGON columns format: Start with @AGON columns header, transpose arrays to name[N] with ├/└ field: val1, val2, ..."
 
     @staticmethod
     def encode(
@@ -69,7 +69,7 @@ class AGONColumns(AGONFormat):
         Args:
             data: JSON-serializable data to encode.
             delimiter: Value delimiter within columns (default: ", ").
-            include_header: Whether to include @AGON columns v1 header.
+            include_header: Whether to include @AGON columns header.
             use_ascii: Use ASCII tree chars (|, `) instead of Unicode.
 
         Returns:
@@ -210,7 +210,7 @@ def _encode_primitive(val: Any, delimiter: str) -> str:
         return "null"
     if isinstance(val, bool):
         return "true" if val else "false"
-    if isinstance(val, (int, float)):
+    if isinstance(val, int | float):
         if isinstance(val, float):
             if val != val:  # NaN
                 return ""
@@ -267,7 +267,7 @@ def _is_columnar_array(arr: list[Any]) -> tuple[bool, list[str]]:
 
     for obj in arr:
         for v in obj.values():
-            if isinstance(v, (dict, list)):
+            if isinstance(v, dict | list):
                 return False, []
 
     key_order: list[str] = []
@@ -281,7 +281,7 @@ def _is_columnar_array(arr: list[Any]) -> tuple[bool, list[str]]:
 
 def _is_primitive_array(arr: list[Any]) -> bool:
     """Check if array contains only primitives."""
-    return all(not isinstance(x, (dict, list)) for x in arr)
+    return all(not isinstance(x, dict | list) for x in arr)
 
 
 def _encode_value(
@@ -295,7 +295,7 @@ def _encode_value(
     """Encode a value, appending lines."""
     indent = INDENT * depth
 
-    if val is None or isinstance(val, (bool, int, float, str)):
+    if val is None or isinstance(val, bool | int | float | str):
         if name:
             lines.append(f"{indent}{name}: {_encode_primitive(val, delimiter)}")
         else:
@@ -389,7 +389,7 @@ def _encode_list_item_object(
         if isinstance(v, dict):
             lines.append(f"{prefix}{k}:")
             for nk, nv in v.items():
-                if isinstance(nv, (dict, list)):
+                if isinstance(nv, dict | list):
                     _encode_value(nv, lines, depth + 2, delimiter, nk, use_ascii)
                 else:
                     lines.append(f"{indent}    {nk}: {_encode_primitive(nv, delimiter)}")
@@ -417,7 +417,7 @@ def _encode_object(
         indent = INDENT * depth
 
     for k, v in obj.items():
-        if isinstance(v, (dict, list)):
+        if isinstance(v, dict | list):
             _encode_value(v, lines, depth, delimiter, k, use_ascii)
         else:
             lines.append(f"{indent}{k}: {_encode_primitive(v, delimiter)}")
