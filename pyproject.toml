@@ -84,6 +84,8 @@ python-source = "python"
 # Rust module installed as agon.agon_core (hard dependency, cleaner than agon._agon)
 module-name = "agon.agon_core"
 features = ["pyo3/extension-module"]
+# Include LICENSE in source distribution
+include = ["LICENSE"]
 
 
 [tool.ruff]
