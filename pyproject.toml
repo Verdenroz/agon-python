@@ -29,6 +29,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Rust",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
@@ -52,6 +53,7 @@ dev = [
     "pytest>=8.3.5",
     "pytest-cov>=4.0.0",
     "pytest-sugar>=1.0.0",
+    "pytest-xdist>=3.8.0",
     # Code quality
     "ruff>=0.11.9",
     "basedpyright>=1.29.1",
@@ -64,29 +66,30 @@ dev = [
     # Documentation
     "mkdocs>=1.6.1",
     "mkdocs-material>=9.5.0",
+    # Build
+    "maturin>=1.10.2",
 ]
 
 
 [build-system]
-requires = ["hatchling", "uv-dynamic-versioning"]
-build-backend = "hatchling.build"
+requires = ["maturin>=1.8,<2.0"]
+build-backend = "maturin"
 
-[tool.hatch.version]
-source = "uv-dynamic-versioning"
 
-[tool.uv-dynamic-versioning]
-vcs = "git"
-style = "pep440"
-bump = true
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/agon"]
+[tool.maturin]
+# Build from workspace member
+manifest-path = "crates/agon-core/Cargo.toml"
+# Python source location
+python-source = "python"
+# Rust module installed as agon.agon_core (hard dependency, cleaner than agon._agon)
+module-name = "agon.agon_core"
+features = ["pyo3/extension-module"]
 
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-src = ["src", "tests"]
+src = ["python", "tests"]
 
 [tool.ruff.lint]
 select = [
@@ -153,10 +156,10 @@ force-sort-within-sections = true
 
 
 [tool.basedpyright]
-include = ["src", "tests"]
+include = ["python", "tests"]
 executionEnvironments = [
     { root = "tests", reportPrivateUsage = false, reportUnknownParameterType = false },
-    { root = "src" },
+    { root = "python" },
 ]
 pythonVersion = "3.11"
 pythonPlatform = "All"
@@ -179,6 +182,7 @@ reportOptionalMemberAccess = false
 [tool.pytest.ini_options]
 minversion = "8.0"
 addopts = [
+    "-n=auto",
     "--strict-markers",
     "--strict-config",
     "--cov=agon",
@@ -204,7 +208,7 @@ filterwarnings = [
 
 
 [tool.coverage.run]
-source = ["src"]
+source = ["python"]
 branch = true
 relative_files = true
 omit = [
@@ -215,7 +219,7 @@ omit = [
 
 [tool.coverage.paths]
 source = [
-    "src/",
+    "python/",
     ".nox/*/lib/python*/site-packages/",
 ]
 
@@ -234,4 +238,4 @@ exclude_lines = [
 ]
 
 [tool.codespell]
-skip = "*.git,*.lock,*.json,__pycache__,*.pyc,*.egg-info,htmlcov,.coverage,coverage.xml"
+skip = "*.git,*.lock,*.json,__pycache__,*.pyc,*.egg-info,htmlcov,.coverage,coverage.xml,target"

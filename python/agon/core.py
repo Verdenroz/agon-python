@@ -20,9 +20,20 @@ if TYPE_CHECKING:
 
 import orjson
 
+# Rust format classes (primary API - inherit from AGONFormat)
+from agon.agon_core import (
+    AGONColumns,
+    AGONFormat,
+    AGONStruct,
+    AGONText,
+)
+from agon.agon_core import (
+    encode_auto_parallel as _rs_encode_auto_parallel,
+)
 from agon.encoding import DEFAULT_ENCODING, count_tokens
 from agon.errors import AGONError
-from agon.formats import AGONColumns, AGONFormat, AGONStruct, AGONText
+
+# Python format classes (for reference/fallback)
 
 Format = Literal["auto", "json", "text", "columns", "struct"]
 ConcreteFormat = Literal["json", "text", "columns", "struct"]
@@ -92,14 +103,15 @@ class AGON:
         "struct": "@AGON struct",
     }
 
-    # Format registries (encode without headers - headers added separately)
+    # Encoders - Rust for AGON formats, orjson for JSON
     _encoders: ClassVar[dict[ConcreteFormat, Callable[[Any], str]]] = {
         "json": lambda data: orjson.dumps(data).decode(),
-        "text": lambda data: AGONText.encode(data, include_header=False),
-        "columns": lambda data: AGONColumns.encode(data, include_header=False),
-        "struct": lambda data: AGONStruct.encode(data, include_header=False),
+        "text": lambda data: str(AGONText.encode(data, include_header=False)),
+        "columns": lambda data: str(AGONColumns.encode(data, include_header=False)),
+        "struct": lambda data: str(AGONStruct.encode(data, include_header=False)),
     }
 
+    # Decoders - Rust for AGON formats
     _decoders: ClassVar[dict[str, Callable[[str], Any]]] = {
         "@AGON text": AGONText.decode,
         "@AGON columns": AGONColumns.decode,
@@ -143,34 +155,16 @@ class AGON:
         """
         # Direct format dispatch
         if format != "auto":
-            text = AGON._encoders[format](data)
+            encoder = AGON._encoders[format]
+            text = encoder(data)
             header = AGON._headers[format]
             return AGONEncoding(format, text, header)
 
-        # format == "auto"
-        candidates = [
-            AGONEncoding(
-                cast("Format", fmt),
-                encoder(data),
-                AGON._headers.get(fmt, ""),
-            )
-            for fmt, encoder in AGON._encoders.items()
-            if force is False or fmt != "json"
-        ]
-
-        token_counts = [count_tokens(c.text, encoding=encoding) for c in candidates]
-        best_idx = min(range(len(candidates)), key=lambda i: token_counts[i])
-        best = candidates[best_idx]
-
-        if not force and best.format != "json":
-            json_result = next(c for c in candidates if c.format == "json")
-            json_idx = candidates.index(json_result)
-            json_tokens = token_counts[json_idx]
-            savings = 1.0 - (token_counts[best_idx] / max(1, json_tokens))
-            if savings < min_savings:
-                return json_result
-
-        return best
+        # format == "auto": use Rust for fast parallel encoding and format selection
+        result = _rs_encode_auto_parallel(data, force, min_savings)
+        selected_format = cast("ConcreteFormat", result.format)
+        header = AGON._headers[selected_format]
+        return AGONEncoding(selected_format, result.text, header)
 
     @overload
     @staticmethod
@@ -220,7 +214,7 @@ class AGON:
             case "json":
                 return AGON._decode_json(text)
             case "text" | "columns" | "struct":
-                header = AGON._headers[cast("ConcreteFormat", format)]
+                header = AGON._headers[format]
                 if not text.startswith(header):
                     text = f"{header}\n\n{text}"
                 return AGON._decoders[header](text)
