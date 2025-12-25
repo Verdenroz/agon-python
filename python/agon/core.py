@@ -16,13 +16,23 @@ import orjson
 
 # Rust py03 bindings
 from agon.agon_core import AGONColumns, AGONFormat, AGONRows, AGONStruct
+from agon.agon_core import count_tokens as _rs_count_tokens
 from agon.agon_core import encode_auto_parallel as _rs_encode_auto_parallel
-from agon.encoding import DEFAULT_ENCODING, count_tokens
 from agon.errors import AGONError
 
 # Type aliases
 Format = Literal["auto", "json", "rows", "columns", "struct"]
 ConcreteFormat = Literal["json", "rows", "columns", "struct"]
+
+# Tiktoken encodings supported by tiktoken_rs
+Encoding = Literal[
+    "o200k_base",  # GPT-4o, o1, o3
+    "o200k_harmony",  # GPT-OSS
+    "cl100k_base",  # GPT-4, GPT-3.5-turbo
+    "p50k_base",  # Codex, text-davinci-003
+    "p50k_edit",  # text-davinci-edit-001
+    "r50k_base",  # GPT-3 (davinci, curie, babbage, ada)
+]
 
 
 @dataclass(frozen=True)
@@ -60,6 +70,35 @@ class AGONEncoding:
         if not self.header:
             return self.text
         return f"{self.header}\n\n{self.text}"
+
+    def hint(self) -> str:
+        """Get a prescriptive hint instructing LLMs how to generate this format.
+
+        NOTE: LLMs have not been trained on AGON, so generation accuracy cannot
+        be guaranteed. Use hints when asking LLMs to return AGON-formatted data,
+        but validate the output. Prefer sending AGON to LLMs (reliable) over
+        asking LLMs to generate AGON (experimental).
+
+        Returns:
+            A short prescriptive hint instructing how to generate the format.
+
+        Example:
+            >>> result = AGON.encode(data, format="auto")
+            >>> result.hint()
+            'Return in AGON rows format: Start with @AGON rows header...'
+        """
+        match self.format:
+            case "rows":
+                return AGONRows.hint()
+            case "columns":
+                return AGONColumns.hint()
+            case "struct":
+                return AGONStruct.hint()
+            case "json":
+                return "JSON: Standard compact JSON encoding"
+            case _:
+                msg = f"Unknown format: {self.format}"
+                raise AGONError(msg)
 
 
 class AGON:
@@ -111,7 +150,7 @@ class AGON:
         format: Format = "auto",
         force: bool = False,
         min_savings: float = 0.10,
-        encoding: str = DEFAULT_ENCODING,
+        encoding: Encoding | None = None,
     ) -> AGONEncoding:
         """Encode data to the most token-efficient AGON format.
 
@@ -125,7 +164,9 @@ class AGON:
                 - "struct": AGONStruct template format for repeated shapes
             force: If True with format="auto", always use a non-JSON format.
             min_savings: Minimum token savings ratio vs JSON to use non-JSON format.
-            encoding: Tiktoken encoding for token counting (default: o200k_base).
+            encoding: Tiktoken encoding for token counting. If None (default),
+                uses fast byte-length estimation. Set to "o200k_base" for accurate
+                token counts (slower). See `Encoding` type for options.
 
         Returns:
             EncodingResult containing:
@@ -147,7 +188,8 @@ class AGON:
             return AGONEncoding(format, text, header)
 
         # format == "auto": use Rust for fast parallel encoding and format selection
-        result = _rs_encode_auto_parallel(data, force, min_savings)
+        # encoding=None means use fast byte-length estimate, otherwise use specified tiktoken encoding
+        result = _rs_encode_auto_parallel(data, force, min_savings, encoding)
         selected_format = cast("ConcreteFormat", result.format)
         header = AGON._headers[selected_format]
         return AGONEncoding(selected_format, result.text, header)
@@ -236,50 +278,20 @@ class AGON:
         return AGONFormat.project_data(data, keep_paths)
 
     @staticmethod
-    def hint(result_or_format: AGONEncoding | ConcreteFormat) -> str:
-        """Get a prescriptive hint instructing LLMs how to generate AGON format.
+    def count_tokens(text: str, *, encoding: Encoding = "o200k_base") -> int:
+        """Count tokens in text using the specified tiktoken encoding.
 
-        NOTE: LLMs have not been trained on AGON, so generation accuracy cannot
-        be guaranteed. Use hints when asking LLMs to return AGON-formatted data,
-        but validate the output. Prefer sending AGON to LLMs (reliable) over
-        asking LLMs to generate AGON (experimental).
+        Uses the Rust tiktoken implementation for performance.
 
         Args:
-            result_or_format: AGONEncoding result or format name ("text", "columns",
-                "struct", "json"). Returns generation instructions for that format.
+            text: Text to count tokens in.
+            encoding: Tiktoken encoding name. See `Encoding` type for options.
+                Default is "o200k_base" (GPT-4o). Use "cl100k_base" for GPT-4/GPT-3.5-turbo.
 
         Returns:
-            A short prescriptive hint instructing how to generate the format.
+            Number of tokens in the text.
 
-        Example:
-            >>> result = AGON.encode(data, format="auto")
-            >>> AGON.hint(result)  # Generation instruction for selected format
-            'Return in AGON rows format: Start with @AGON rows header, encode arrays as name[N]{fields} with tab-delimited rows'
-            >>> AGON.hint("columns")  # Generation instruction for columns format
-            'Return in AGON columns format: Start with @AGON columns header, transpose arrays to name[N] with ├/└ field: val1, val2, ...'
+        Raises:
+            ValueError: If the encoding is not supported.
         """
-        # Extract format if AGONEncoding was passed
-        format_name = (
-            result_or_format.format
-            if isinstance(result_or_format, AGONEncoding)
-            else result_or_format
-        )
-
-        # Return hint for specific format
-        match format_name:
-            case "rows":
-                return AGONRows.hint()
-            case "columns":
-                return AGONColumns.hint()
-            case "struct":
-                return AGONStruct.hint()
-            case "json":
-                return "JSON: Standard compact JSON encoding"
-            case _:
-                msg = f"Unknown format: {format_name}"
-                raise AGONError(msg)
-
-    @staticmethod
-    def count_tokens(text: str, *, encoding: str = DEFAULT_ENCODING) -> int:
-        """Count tokens in text using the specified encoding."""
-        return count_tokens(text, encoding=encoding)
+        return _rs_count_tokens(text, encoding)

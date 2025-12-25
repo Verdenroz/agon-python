@@ -388,22 +388,21 @@ fn encode_array(arr: &[Value], lines: &mut Vec<String>, depth: usize, registry: 
             // If object has nested objects/arrays, use list item format to preserve them
             let has_nested = obj.values().any(|v| v.is_object() || v.is_array());
 
-            if !has_nested {
-                if let Some(struct_name) = find_matching_struct(obj, registry) {
-                    if let Some((fields, _, _)) = registry.get(&struct_name) {
-                        let values: Vec<String> = fields
-                            .iter()
-                            .map(|f| obj.get(f).map(format_primitive).unwrap_or_default())
-                            .collect();
-                        lines.push(format!(
-                            "{}  - {}({})",
-                            indent,
-                            struct_name,
-                            values.join(", ")
-                        ));
-                        continue;
-                    }
-                }
+            if !has_nested
+                && let Some(struct_name) = find_matching_struct(obj, registry)
+                && let Some((fields, _, _)) = registry.get(&struct_name)
+            {
+                let values: Vec<String> = fields
+                    .iter()
+                    .map(|f| obj.get(f).map(format_primitive).unwrap_or_default())
+                    .collect();
+                lines.push(format!(
+                    "{}  - {}({})",
+                    indent,
+                    struct_name,
+                    values.join(", ")
+                ));
+                continue;
             }
             encode_list_item(obj, lines, depth + 1, registry);
         } else {
@@ -430,23 +429,22 @@ fn encode_list_item(
         first = false;
 
         // Check if value can use a struct
-        if let Some(nested_obj) = v.as_object() {
-            if let Some(struct_name) = find_matching_struct(nested_obj, registry) {
-                if let Some((fields, _, _)) = registry.get(&struct_name) {
-                    let values: Vec<String> = fields
-                        .iter()
-                        .map(|f| nested_obj.get(f).map(format_primitive).unwrap_or_default())
-                        .collect();
-                    lines.push(format!(
-                        "{}{}: {}({})",
-                        prefix,
-                        k,
-                        struct_name,
-                        values.join(", ")
-                    ));
-                    continue;
-                }
-            }
+        if let Some(nested_obj) = v.as_object()
+            && let Some(struct_name) = find_matching_struct(nested_obj, registry)
+            && let Some((fields, _, _)) = registry.get(&struct_name)
+        {
+            let values: Vec<String> = fields
+                .iter()
+                .map(|f| nested_obj.get(f).map(format_primitive).unwrap_or_default())
+                .collect();
+            lines.push(format!(
+                "{}{}: {}({})",
+                prefix,
+                k,
+                struct_name,
+                values.join(", ")
+            ));
+            continue;
         }
 
         match v {
@@ -484,23 +482,22 @@ fn encode_object(
 
     for (k, v) in obj {
         // Check if value can use a struct
-        if let Some(nested_obj) = v.as_object() {
-            if let Some(struct_name) = find_matching_struct(nested_obj, registry) {
-                if let Some((fields, _, _)) = registry.get(&struct_name) {
-                    let values: Vec<String> = fields
-                        .iter()
-                        .map(|f| nested_obj.get(f).map(format_primitive).unwrap_or_default())
-                        .collect();
-                    lines.push(format!(
-                        "{}{}: {}({})",
-                        actual_indent,
-                        k,
-                        struct_name,
-                        values.join(", ")
-                    ));
-                    continue;
-                }
-            }
+        if let Some(nested_obj) = v.as_object()
+            && let Some(struct_name) = find_matching_struct(nested_obj, registry)
+            && let Some((fields, _, _)) = registry.get(&struct_name)
+        {
+            let values: Vec<String> = fields
+                .iter()
+                .map(|f| nested_obj.get(f).map(format_primitive).unwrap_or_default())
+                .collect();
+            lines.push(format!(
+                "{}{}: {}({})",
+                actual_indent,
+                k,
+                struct_name,
+                values.join(", ")
+            ));
+            continue;
         }
 
         match v {
@@ -584,10 +581,10 @@ fn parse_primitive(s: &str) -> Value {
     // Number
     if NUMBER_RE.is_match(s) {
         if s.contains('.') || s.to_lowercase().contains('e') {
-            if let Ok(f) = s.parse::<f64>() {
-                if let Some(n) = serde_json::Number::from_f64(f) {
-                    return Value::Number(n);
-                }
+            if let Ok(f) = s.parse::<f64>()
+                && let Some(n) = serde_json::Number::from_f64(f)
+            {
+                return Value::Number(n);
             }
         } else if let Ok(i) = s.parse::<i64>() {
             return Value::Number(i.into());

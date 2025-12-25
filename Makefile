@@ -3,7 +3,7 @@
 
 .DEFAULT_GOAL := default
 
-.PHONY: default install fix test nox upgrade build docs clean pre-commit help
+.PHONY: default install fix test nox upgrade build docs clean pre-commit benchmarks help
 
 default: install build fix test
 
@@ -28,6 +28,10 @@ test: build
 
 nox: build
 	uv run nox
+
+benchmarks: build
+	@echo "📊 Running AGON benchmarks..."
+	uv run pytest tests/test_benchmarks.py -s --no-cov -o addopts=""
 
 upgrade:
 	uv sync --upgrade --dev
@@ -60,6 +64,7 @@ help:
 	@echo "Testing:"
 	@echo "  make test          - Run Rust + Python tests with coverage"
 	@echo "  make nox           - Run nox sessions (builds Rust first)"
+	@echo "  make benchmarks    - Run performance benchmarks"
 	@echo ""
 	@echo "Other:"
 	@echo "  make docs          - Serve docs locally"

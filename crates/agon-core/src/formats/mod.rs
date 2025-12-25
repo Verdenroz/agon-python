@@ -24,6 +24,22 @@ pub struct EncodingResult {
     pub token_estimate: usize,
 }
 
+/// Fast byte-length estimate for format comparison (avoids expensive tokenization)
+/// Actual token count can be computed later if needed
+fn estimate_tokens_fast(text: &str) -> usize {
+    // Rough heuristic: ~4 chars per token for English text
+    // This is only used for relative comparison between formats
+    text.len() / 4
+}
+
+/// Count tokens - either fast estimate or accurate tiktoken with specified encoding
+fn count_tokens_for_comparison(text: &str, encoding: Option<&str>) -> usize {
+    match encoding {
+        Some(enc) => count_tokens(text, enc).unwrap_or_else(|_| estimate_tokens_fast(text)),
+        None => estimate_tokens_fast(text),
+    }
+}
+
 /// Headers for each format
 pub fn get_header(format: &str) -> &'static str {
     match format {
@@ -40,17 +56,18 @@ pub fn encode_auto_parallel(
     data: &JsonValue,
     force: bool,
     min_savings: f64,
+    encoding: Option<&str>,
 ) -> Result<EncodingResult> {
-    let results = encode_all_parallel(data)?;
+    let results = encode_all_parallel_internal(data, encoding)?;
 
     // Find JSON baseline
     let json_result = results.iter().find(|r| r.format == "json");
     let json_tokens = json_result.map(|r| r.token_estimate).unwrap_or(usize::MAX);
 
-    // Find best non-JSON result
+    // Find best result (exclude JSON if force=true)
     let best = results
         .iter()
-        .filter(|r| force || r.format != "json")
+        .filter(|r| !force || r.format != "json")
         .min_by_key(|r| r.token_estimate);
 
     match best {
@@ -73,7 +90,7 @@ pub fn encode_auto_parallel(
         None => {
             // Fallback to JSON
             let text = serde_json::to_string(data)?;
-            let tokens = count_tokens(&text);
+            let tokens = estimate_tokens_fast(&text);
             Ok(EncodingResult {
                 format: "json".to_string(),
                 text,
@@ -84,14 +101,22 @@ pub fn encode_auto_parallel(
     }
 }
 
-/// Encode data with all formats in parallel
+/// Encode data with all formats in parallel (public API - uses fast estimate)
 pub fn encode_all_parallel(data: &JsonValue) -> Result<Vec<EncodingResult>> {
+    encode_all_parallel_internal(data, None)
+}
+
+/// Internal: Encode data with all formats in parallel
+fn encode_all_parallel_internal(
+    data: &JsonValue,
+    encoding: Option<&str>,
+) -> Result<Vec<EncodingResult>> {
     let formats = ["json", "rows", "columns", "struct"];
 
     // Use rayon to encode all formats in parallel
     let results: Vec<Result<EncodingResult>> = formats
         .par_iter()
-        .map(|format| encode_with_format(data, format))
+        .map(|format| encode_with_format(data, format, encoding))
         .collect();
 
     // Collect results, filtering out errors
@@ -110,7 +135,7 @@ pub fn encode_all_parallel(data: &JsonValue) -> Result<Vec<EncodingResult>> {
             format: "json".to_string(),
             text: text.clone(),
             header: String::new(),
-            token_estimate: count_tokens(&text),
+            token_estimate: count_tokens_for_comparison(&text, encoding),
         });
     }
 
@@ -118,7 +143,11 @@ pub fn encode_all_parallel(data: &JsonValue) -> Result<Vec<EncodingResult>> {
 }
 
 /// Encode data with a specific format
-fn encode_with_format(data: &JsonValue, format: &str) -> Result<EncodingResult> {
+fn encode_with_format(
+    data: &JsonValue,
+    format: &str,
+    encoding: Option<&str>,
+) -> Result<EncodingResult> {
     let (text, header) = match format {
         "json" => (serde_json::to_string(data)?, String::new()),
         "rows" => (rows::encode(data, false)?, get_header("rows").to_string()),
@@ -133,7 +162,7 @@ fn encode_with_format(data: &JsonValue, format: &str) -> Result<EncodingResult> 
         _ => return Err(crate::error::AgonError::InvalidFormat(format.to_string())),
     };
 
-    let token_estimate = count_tokens(&text);
+    let token_estimate = count_tokens_for_comparison(&text, encoding);
 
     Ok(EncodingResult {
         format: format.to_string(),
@@ -197,7 +226,7 @@ mod tests {
             {"id": 3, "name": "Carol", "role": "user"}
         ]);
 
-        let result = encode_auto_parallel(&data, false, 0.0).unwrap();
+        let result = encode_auto_parallel(&data, false, 0.0, None).unwrap();
 
         // Should select a non-JSON format for tabular data
         assert!(!result.text.is_empty());
@@ -209,7 +238,7 @@ mod tests {
         let data = json!({"simple": "data"});
 
         // With force=true, should never return JSON (if alternatives exist)
-        let result = encode_auto_parallel(&data, true, 0.0).unwrap();
+        let result = encode_auto_parallel(&data, true, 0.0, None).unwrap();
 
         // Result should be valid
         assert!(!result.text.is_empty());
@@ -220,7 +249,7 @@ mod tests {
         let data = json!({"a": 1});
 
         // With high min_savings threshold, should fall back to JSON if savings aren't met
-        let result = encode_auto_parallel(&data, false, 0.99).unwrap();
+        let result = encode_auto_parallel(&data, false, 0.99, None).unwrap();
 
         // Should get a valid result regardless
         assert!(!result.text.is_empty());
@@ -229,7 +258,7 @@ mod tests {
     #[test]
     fn test_encode_with_format_json() {
         let data = json!({"key": "value"});
-        let result = encode_with_format(&data, "json").unwrap();
+        let result = encode_with_format(&data, "json", None).unwrap();
 
         assert_eq!(result.format, "json");
         assert!(result.header.is_empty());
@@ -239,7 +268,7 @@ mod tests {
     #[test]
     fn test_encode_with_format_rows() {
         let data = json!({"name": "test"});
-        let result = encode_with_format(&data, "rows").unwrap();
+        let result = encode_with_format(&data, "rows", None).unwrap();
 
         assert_eq!(result.format, "rows");
         assert_eq!(result.header, "@AGON rows");
@@ -248,7 +277,7 @@ mod tests {
     #[test]
     fn test_encode_with_format_columns() {
         let data = json!([{"id": 1}, {"id": 2}]);
-        let result = encode_with_format(&data, "columns").unwrap();
+        let result = encode_with_format(&data, "columns", None).unwrap();
 
         assert_eq!(result.format, "columns");
         assert_eq!(result.header, "@AGON columns");
@@ -257,7 +286,7 @@ mod tests {
     #[test]
     fn test_encode_with_format_struct() {
         let data = json!({"a": {"fmt": "1", "raw": 1}});
-        let result = encode_with_format(&data, "struct").unwrap();
+        let result = encode_with_format(&data, "struct", None).unwrap();
 
         assert_eq!(result.format, "struct");
         assert_eq!(result.header, "@AGON struct");
@@ -266,7 +295,7 @@ mod tests {
     #[test]
     fn test_encode_with_format_invalid() {
         let data = json!({});
-        let result = encode_with_format(&data, "invalid_format");
+        let result = encode_with_format(&data, "invalid_format", None);
 
         assert!(result.is_err());
     }

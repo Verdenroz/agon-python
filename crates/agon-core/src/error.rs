@@ -1,7 +1,7 @@
 //! Error types for AGON encoding/decoding
 
-use pyo3::exceptions::PyValueError;
 use pyo3::PyErr;
+use pyo3::exceptions::PyValueError;
 use thiserror::Error;
 
 #[derive(Error, Debug)]

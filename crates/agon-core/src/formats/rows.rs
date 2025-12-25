@@ -189,10 +189,10 @@ fn parse_primitive(s: &str) -> Value {
     // Number
     if NUMBER_RE.is_match(s) {
         if s.contains('.') || s.to_lowercase().contains('e') {
-            if let Ok(f) = s.parse::<f64>() {
-                if let Some(n) = serde_json::Number::from_f64(f) {
-                    return Value::Number(n);
-                }
+            if let Ok(f) = s.parse::<f64>()
+                && let Some(n) = serde_json::Number::from_f64(f)
+            {
+                return Value::Number(n);
             }
         } else if let Ok(i) = s.parse::<i64>() {
             return Value::Number(i.into());

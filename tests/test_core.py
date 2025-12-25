@@ -94,64 +94,62 @@ def test_project_data_delegates() -> None:
 
 
 def test_hint_with_agon_encoding_result() -> None:
-    """hint() should accept AGONEncoding and return prescriptive generation instructions."""
+    """AGONEncoding.hint() should return prescriptive generation instructions."""
     data = [{"id": 1, "name": "Alice"}]
     result = AGON.encode(data, format="rows")
-    hint = AGON.hint(result)
+    hint = result.hint()
     assert isinstance(hint, str)
     assert "Return in AGON rows format" in hint
     assert "@AGON rows header" in hint
 
 
-def test_hint_with_format_string_rows() -> None:
-    """hint() should accept format string and return generation instructions."""
-    hint = AGON.hint("rows")
+def test_hint_rows_format() -> None:
+    """hint() should return rows format instructions."""
+    result = AGON.encode({"a": 1}, format="rows")
+    hint = result.hint()
     assert isinstance(hint, str)
     assert "Return in AGON rows format" in hint
     assert "@AGON rows header" in hint
     assert "name[N]{fields}" in hint
 
 
-def test_hint_with_format_string_columns() -> None:
-    """hint() should return prescriptive columns format instructions."""
-    hint = AGON.hint("columns")
+def test_hint_columns_format() -> None:
+    """hint() should return columns format instructions."""
+    result = AGON.encode([{"id": 1}], format="columns")
+    hint = result.hint()
     assert isinstance(hint, str)
     assert "Return in AGON columns format" in hint
     assert "@AGON columns header" in hint
     assert "├/└" in hint
 
 
-def test_hint_with_format_string_struct() -> None:
-    """hint() should return prescriptive struct format instructions."""
-    hint = AGON.hint("struct")
+def test_hint_struct_format() -> None:
+    """hint() should return struct format instructions."""
+    result = AGON.encode({"a": {"fmt": "1", "raw": 1}}, format="struct")
+    hint = result.hint()
     assert isinstance(hint, str)
     assert "Return in AGON struct format" in hint
     assert "@AGON struct header" in hint
     assert "@Struct" in hint or "Struct(" in hint
 
 
-def test_hint_with_format_string_json() -> None:
+def test_hint_json_format() -> None:
     """hint() should return JSON format hint."""
-    hint = AGON.hint("json")
+    result = AGON.encode({"a": 1}, format="json")
+    hint = result.hint()
     assert isinstance(hint, str)
     assert "JSON" in hint
 
 
-def test_hint_with_unknown_format_raises() -> None:
-    """hint() should raise AGONError for unknown format."""
-    with pytest.raises(AGONError, match="Unknown format"):
-        AGON.hint("invalid_format")  # type: ignore[arg-type]
-
-
-def test_hint_matches_encoding_format() -> None:
-    """hint() should return matching hint for different encoded formats."""
+def test_hint_matches_across_formats() -> None:
+    """hint() should return consistent hints for each format."""
     data = [{"id": 1, "name": "Alice"}]
 
     for fmt in ["rows", "columns", "struct", "json"]:
         result = AGON.encode(data, format=fmt)  # type: ignore[arg-type]
-        hint_from_result = AGON.hint(result)
-        hint_from_string = AGON.hint(fmt)  # type: ignore[arg-type]
-        assert hint_from_result == hint_from_string
+        hint = result.hint()
+        assert isinstance(hint, str)
+        assert len(hint) > 0
 
 
 def test_count_tokens_positive() -> None:
@@ -247,6 +245,59 @@ def test_encode_reports_json_fallback() -> None:
     res = AGON.encode(records, format="auto", min_savings=1.0)
     assert res.format == "json"
     assert res.text.startswith("[")
+
+
+def test_encode_with_encoding_none_uses_fast_estimate() -> None:
+    """encoding=None (default) uses fast byte-length estimate."""
+    data = [{"id": i, "name": f"User{i}"} for i in range(10)]
+    result = AGON.encode(data, format="auto", encoding=None)
+    assert result.format in ("json", "rows", "columns", "struct")
+    assert len(result.text) > 0
+
+
+def test_encode_with_encoding_specified_uses_tiktoken() -> None:
+    """encoding='o200k_base' uses tiktoken for accurate token counting."""
+    data = [{"id": i, "name": f"User{i}"} for i in range(10)]
+    result = AGON.encode(data, format="auto", encoding="o200k_base")
+    assert result.format in ("json", "rows", "columns", "struct")
+    assert len(result.text) > 0
+
+
+def test_encode_both_encoding_modes_produce_valid_results() -> None:
+    """Both encoding modes should produce decodable results."""
+    data = [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]
+
+    # Fast estimate (default)
+    result_fast = AGON.encode(data, format="auto", encoding=None)
+    decoded_fast = AGON.decode(result_fast)
+    assert decoded_fast == data
+
+    # Tiktoken
+    result_tiktoken = AGON.encode(data, format="auto", encoding="o200k_base")
+    decoded_tiktoken = AGON.decode(result_tiktoken)
+    assert decoded_tiktoken == data
+
+
+def test_count_tokens_with_default_encoding() -> None:
+    """count_tokens uses o200k_base by default."""
+    tokens = AGON.count_tokens("hello world")
+    assert tokens > 0
+    assert isinstance(tokens, int)
+
+
+def test_count_tokens_with_different_encodings() -> None:
+    """count_tokens supports multiple tiktoken encodings."""
+    text = "The quick brown fox jumps over the lazy dog."
+
+    # Different encodings may produce different token counts
+    o200k = AGON.count_tokens(text, encoding="o200k_base")
+    cl100k = AGON.count_tokens(text, encoding="cl100k_base")
+
+    assert o200k > 0
+    assert cl100k > 0
+    # Token counts may differ between encodings
+    assert isinstance(o200k, int)
+    assert isinstance(cl100k, int)
 
 
 def test_agon_encoding_str_returns_text() -> None:

@@ -156,10 +156,10 @@ fn parse_primitive(s: &str) -> Value {
     if let Ok(i) = s.parse::<i64>() {
         return Value::Number(i.into());
     }
-    if let Ok(f) = s.parse::<f64>() {
-        if let Some(n) = serde_json::Number::from_f64(f) {
-            return Value::Number(n);
-        }
+    if let Ok(f) = s.parse::<f64>()
+        && let Some(n) = serde_json::Number::from_f64(f)
+    {
+        return Value::Number(n);
     }
 
     Value::String(s.to_string())
@@ -428,54 +428,53 @@ fn decode_value(
     let base_depth = get_indent_depth(lines[idx]);
 
     // Check for array patterns: [N], [N]:, name[N], name[N]:
-    if let Some(bracket_pos) = line.find('[') {
-        if let Some(end_pos) = line.find(']') {
-            if end_pos > bracket_pos {
-                let name = &line[..bracket_pos];
-                let count_str = &line[bracket_pos + 1..end_pos];
-                if let Ok(count) = count_str.parse::<usize>() {
-                    // If this is a named array (name[N]), it's part of an object
-                    // Delegate to decode_object to parse the full object
-                    if !name.is_empty() {
-                        return decode_object(lines, idx, delimiter);
-                    }
+    if let Some(bracket_pos) = line.find('[')
+        && let Some(end_pos) = line.find(']')
+        && end_pos > bracket_pos
+    {
+        let name = &line[..bracket_pos];
+        let count_str = &line[bracket_pos + 1..end_pos];
+        if let Ok(count) = count_str.parse::<usize>() {
+            // If this is a named array (name[N]), it's part of an object
+            // Delegate to decode_object to parse the full object
+            if !name.is_empty() {
+                return decode_object(lines, idx, delimiter);
+            }
 
-                    // Unnamed array: [N]
-                    // Check if next line has ├ or └ (columnar format)
-                    if idx + 1 < lines.len() {
-                        let next = lines[idx + 1].trim();
-                        if next.starts_with('├') || next.starts_with('└') {
-                            return decode_columnar_array(lines, idx, "", count, delimiter);
-                        }
-                    }
-
-                    // Check for inline primitive array: [N]: val1\tval2
-                    if let Some(colon_pos) = line.find("]:") {
-                        let values_str = line[colon_pos + 2..].trim();
-                        if !values_str.is_empty() {
-                            let values: Vec<Value> =
-                                values_str.split(delimiter).map(parse_primitive).collect();
-                            return Ok((Value::Array(values), idx + 1));
-                        }
-                        // Empty values after colon means list array: [N]:
-                        return decode_list_array(lines, idx, base_depth, count, delimiter);
-                    }
-
-                    // Bare [N] with no colon - could be empty array or non-columnar array
-                    if count == 0 {
-                        return Ok((Value::Array(vec![]), idx + 1));
-                    }
-                    // Check if next line is a list item
-                    if idx + 1 < lines.len() {
-                        let next = lines[idx + 1].trim();
-                        if next.starts_with("- ") {
-                            return decode_list_array(lines, idx, base_depth, count, delimiter);
-                        }
-                    }
-                    // No colon, no columnar, no list - it's an empty array
-                    return Ok((Value::Array(vec![]), idx + 1));
+            // Unnamed array: [N]
+            // Check if next line has ├ or └ (columnar format)
+            if idx + 1 < lines.len() {
+                let next = lines[idx + 1].trim();
+                if next.starts_with('├') || next.starts_with('└') {
+                    return decode_columnar_array(lines, idx, "", count, delimiter);
                 }
             }
+
+            // Check for inline primitive array: [N]: val1\tval2
+            if let Some(colon_pos) = line.find("]:") {
+                let values_str = line[colon_pos + 2..].trim();
+                if !values_str.is_empty() {
+                    let values: Vec<Value> =
+                        values_str.split(delimiter).map(parse_primitive).collect();
+                    return Ok((Value::Array(values), idx + 1));
+                }
+                // Empty values after colon means list array: [N]:
+                return decode_list_array(lines, idx, base_depth, count, delimiter);
+            }
+
+            // Bare [N] with no colon - could be empty array or non-columnar array
+            if count == 0 {
+                return Ok((Value::Array(vec![]), idx + 1));
+            }
+            // Check if next line is a list item
+            if idx + 1 < lines.len() {
+                let next = lines[idx + 1].trim();
+                if next.starts_with("- ") {
+                    return decode_list_array(lines, idx, base_depth, count, delimiter);
+                }
+            }
+            // No colon, no columnar, no list - it's an empty array
+            return Ok((Value::Array(vec![]), idx + 1));
         }
     }
 
@@ -639,20 +638,18 @@ fn decode_object(lines: &[&str], idx: usize, delimiter: &str) -> Result<(Value, 
         let stripped = line.trim();
 
         // Check for array patterns: name[N] or name[N]: values
-        if let Some(bracket_pos) = stripped.find('[') {
-            if let Some(end_pos) = stripped.find(']') {
-                if end_pos > bracket_pos {
-                    let name = &stripped[..bracket_pos];
-                    let count_str = &stripped[bracket_pos + 1..end_pos];
-                    if let Ok(count) = count_str.parse::<usize>() {
-                        // This is an array pattern - decode it via decode_value
-                        let (arr, new_idx) =
-                            decode_array_in_object(lines, idx, name, count, delimiter)?;
-                        result.insert(name.to_string(), arr);
-                        idx = new_idx;
-                        continue;
-                    }
-                }
+        if let Some(bracket_pos) = stripped.find('[')
+            && let Some(end_pos) = stripped.find(']')
+            && end_pos > bracket_pos
+        {
+            let name = &stripped[..bracket_pos];
+            let count_str = &stripped[bracket_pos + 1..end_pos];
+            if let Ok(count) = count_str.parse::<usize>() {
+                // This is an array pattern - decode it via decode_value
+                let (arr, new_idx) = decode_array_in_object(lines, idx, name, count, delimiter)?;
+                result.insert(name.to_string(), arr);
+                idx = new_idx;
+                continue;
             }
         }
 
@@ -833,19 +830,18 @@ fn decode_list_item_object(
         }
 
         // Check for array patterns
-        if let Some(bracket_pos) = stripped.find('[') {
-            if let Some(end_pos) = stripped.find(']') {
-                if end_pos > bracket_pos {
-                    let arr_name = &stripped[..bracket_pos];
-                    let count_str = &stripped[bracket_pos + 1..end_pos];
-                    if let Ok(count) = count_str.parse::<usize>() {
-                        let (arr, new_idx) =
-                            decode_array_in_object(lines, idx, arr_name, count, delimiter)?;
-                        obj.insert(arr_name.to_string(), arr);
-                        idx = new_idx;
-                        continue;
-                    }
-                }
+        if let Some(bracket_pos) = stripped.find('[')
+            && let Some(end_pos) = stripped.find(']')
+            && end_pos > bracket_pos
+        {
+            let arr_name = &stripped[..bracket_pos];
+            let count_str = &stripped[bracket_pos + 1..end_pos];
+            if let Ok(count) = count_str.parse::<usize>() {
+                let (arr, new_idx) =
+                    decode_array_in_object(lines, idx, arr_name, count, delimiter)?;
+                obj.insert(arr_name.to_string(), arr);
+                idx = new_idx;
+                continue;
             }
         }
 

@@ -137,7 +137,7 @@ fn build_keep_tree(keep_paths: &[String]) -> KeepTree {
                     .children
                     .entry(key)
                     .or_insert_with(|| Some(Box::new(KeepTree::default())));
-                if let Some(ref mut subtree) = entry {
+                if let Some(subtree) = entry {
                     cur = subtree.as_mut();
                 } else {
                     // Was None (keep whole), upgrade to subtree
@@ -362,20 +362,29 @@ impl EncodingResult {
 // ============================================================================
 
 #[pyfunction]
-#[pyo3(signature = (data, force = false, min_savings = 0.10))]
+#[pyo3(signature = (data, force = false, min_savings = 0.10, encoding = None))]
 fn encode_auto_parallel(
     data: &Bound<'_, PyAny>,
     force: bool,
     min_savings: f64,
+    encoding: Option<&str>,
 ) -> PyResult<EncodingResult> {
     let value = types::py_to_json(data)?;
-    let result = formats::encode_auto_parallel(&value, force, min_savings)?;
+    let result = formats::encode_auto_parallel(&value, force, min_savings, encoding)?;
     Ok(EncodingResult {
         format: result.format,
         text: result.text,
         header: result.header,
         token_estimate: result.token_estimate,
     })
+}
+
+/// Count tokens using tiktoken encoding
+#[pyfunction]
+#[pyo3(signature = (text, encoding = "o200k_base"))]
+fn count_tokens(text: &str, encoding: &str) -> PyResult<usize> {
+    utils::count_tokens(text, encoding)
+        .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))
 }
 
 #[pyfunction]
@@ -406,6 +415,7 @@ fn agon_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<EncodingResult>()?;
     m.add_function(wrap_pyfunction!(encode_auto_parallel, m)?)?;
     m.add_function(wrap_pyfunction!(encode_all_parallel, m)?)?;
+    m.add_function(wrap_pyfunction!(count_tokens, m)?)?;
     Ok(())
 }
 

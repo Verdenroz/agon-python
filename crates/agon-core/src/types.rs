@@ -25,10 +25,10 @@ pub fn py_to_json(obj: &Bound<'_, PyAny>) -> Result<JsonValue> {
             return Ok(JsonValue::Number(n.into()));
         }
         // Try as float if i64 doesn't work (large numbers)
-        if let Ok(f) = obj.extract::<f64>() {
-            if let Some(n) = serde_json::Number::from_f64(f) {
-                return Ok(JsonValue::Number(n));
-            }
+        if let Ok(f) = obj.extract::<f64>()
+            && let Some(n) = serde_json::Number::from_f64(f)
+        {
+            return Ok(JsonValue::Number(n));
         }
         return Err(AgonError::InvalidData("Integer too large".to_string()));
     }

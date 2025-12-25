@@ -3,7 +3,9 @@
 A self-describing, token-efficient data interchange format optimized for LLMs.
 """
 
-# Re-export Rust format classes (inherit from AGONFormat)
+from importlib.metadata import version
+
+# Re-export Rust format classes
 from agon.agon_core import (
     AGONColumns,
     AGONFormat,
@@ -13,7 +15,7 @@ from agon.agon_core import (
     encode_all_parallel,
     encode_auto_parallel,
 )
-from agon.core import AGON, AGONEncoding, Format
+from agon.core import AGON, AGONEncoding, Encoding, Format
 from agon.errors import AGONError
 
 __all__ = [
@@ -24,9 +26,10 @@ __all__ = [
     "AGONFormat",
     "AGONRows",
     "AGONStruct",
+    "Encoding",
     "EncodingResult",
     "Format",
     "encode_all_parallel",
     "encode_auto_parallel",
 ]
-__version__ = "0.1.0"
+__version__ = version("agon-python")
