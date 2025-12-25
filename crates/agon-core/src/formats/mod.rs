@@ -1,13 +1,13 @@
 //! AGON encoding formats
 //!
 //! This module contains implementations of the three AGON formats:
-//! - text: Row-based tabular encoding (similar to TOON)
+//! - rows: Row-based tabular encoding (format name: "text")
 //! - columns: Columnar encoding with type clustering
 //! - struct_fmt: Template-based encoding for nested patterns
 
 pub mod columns;
+pub mod rows;
 pub mod struct_fmt;
-pub mod text;
 
 use rayon::prelude::*;
 use serde_json::Value as JsonValue;
@@ -27,7 +27,7 @@ pub struct EncodingResult {
 /// Headers for each format
 pub fn get_header(format: &str) -> &'static str {
     match format {
-        "text" => "@AGON text",
+        "rows" => "@AGON rows",
         "columns" => "@AGON columns",
         "struct" => "@AGON struct",
         "json" => "",
@@ -86,7 +86,7 @@ pub fn encode_auto_parallel(
 
 /// Encode data with all formats in parallel
 pub fn encode_all_parallel(data: &JsonValue) -> Result<Vec<EncodingResult>> {
-    let formats = ["json", "text", "columns", "struct"];
+    let formats = ["json", "rows", "columns", "struct"];
 
     // Use rayon to encode all formats in parallel
     let results: Vec<Result<EncodingResult>> = formats
@@ -121,7 +121,7 @@ pub fn encode_all_parallel(data: &JsonValue) -> Result<Vec<EncodingResult>> {
 fn encode_with_format(data: &JsonValue, format: &str) -> Result<EncodingResult> {
     let (text, header) = match format {
         "json" => (serde_json::to_string(data)?, String::new()),
-        "text" => (text::encode(data, false)?, get_header("text").to_string()),
+        "rows" => (rows::encode(data, false)?, get_header("rows").to_string()),
         "columns" => (
             columns::encode(data, false)?,
             get_header("columns").to_string(),
@@ -150,7 +150,7 @@ mod tests {
 
     #[test]
     fn test_get_header() {
-        assert_eq!(get_header("text"), "@AGON text");
+        assert_eq!(get_header("rows"), "@AGON rows");
         assert_eq!(get_header("columns"), "@AGON columns");
         assert_eq!(get_header("struct"), "@AGON struct");
         assert_eq!(get_header("json"), "");
@@ -184,7 +184,7 @@ mod tests {
 
         let formats: Vec<&str> = results.iter().map(|r| r.format.as_str()).collect();
         assert!(formats.contains(&"json"));
-        assert!(formats.contains(&"text"));
+        assert!(formats.contains(&"rows"));
         assert!(formats.contains(&"columns"));
         assert!(formats.contains(&"struct"));
     }
@@ -237,12 +237,12 @@ mod tests {
     }
 
     #[test]
-    fn test_encode_with_format_text() {
+    fn test_encode_with_format_rows() {
         let data = json!({"name": "test"});
-        let result = encode_with_format(&data, "text").unwrap();
+        let result = encode_with_format(&data, "rows").unwrap();
 
-        assert_eq!(result.format, "text");
-        assert_eq!(result.header, "@AGON text");
+        assert_eq!(result.format, "rows");
+        assert_eq!(result.header, "@AGON rows");
     }
 
     #[test]

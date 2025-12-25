@@ -105,7 +105,7 @@ def test_fixture_benchmark(fixture_path: Path) -> None:
     ] = {}  # tokens, savings, encode_ms, decode_ms
 
     for fmt, encoder, decoder in [
-        ("text", lambda data: AGON.encode(data, format="text"), AGON.decode),  # type: ignore[misc]
+        ("rows", lambda data: AGON.encode(data, format="rows"), AGON.decode),  # type: ignore[misc]
         ("columns", lambda data: AGON.encode(data, format="columns"), AGON.decode),  # type: ignore[misc]
         ("struct", lambda data: AGON.encode(data, format="struct"), AGON.decode),  # type: ignore[misc]
     ]:

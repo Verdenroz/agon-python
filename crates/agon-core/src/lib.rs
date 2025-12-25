@@ -1,7 +1,7 @@
 //! AGON Core: Rust implementation of AGON encoding formats
 //!
 //! All format classes inherit from AGONFormat base class:
-//! - AGONText: Row-based tabular encoding
+//! - AGONRows: Row-based tabular encoding
 //! - AGONColumns: Columnar encoding with type clustering
 //! - AGONStruct: Template-based encoding for nested patterns
 
@@ -16,7 +16,7 @@ mod types;
 mod utils;
 
 pub use error::AgonError;
-pub use formats::{columns, struct_fmt, text};
+pub use formats::{columns, rows, struct_fmt};
 pub use types::JsonValue;
 
 // ============================================================================
@@ -214,40 +214,40 @@ fn project_obj(
 }
 
 // ============================================================================
-// AGONText - Row-based tabular encoding
+// AGONRows - Row-based tabular encoding
 // ============================================================================
 
 /// Row-based tabular encoding format.
 #[pyclass(extends=AGONFormat)]
-struct AGONText;
+struct AGONRows;
 
 #[pymethods]
-impl AGONText {
+impl AGONRows {
     #[new]
     fn new() -> (Self, AGONFormat) {
-        (AGONText, AGONFormat)
+        (AGONRows, AGONFormat)
     }
 
     #[staticmethod]
     #[pyo3(signature = (data, include_header = false))]
     fn encode(data: &Bound<'_, PyAny>, include_header: bool) -> PyResult<String> {
         let value = types::py_to_json(data)?;
-        text::encode(&value, include_header).map_err(|e| e.into())
+        rows::encode(&value, include_header).map_err(|e| e.into())
     }
 
     #[staticmethod]
     fn decode(py: Python<'_>, payload: &str) -> PyResult<Py<PyAny>> {
-        let value = text::decode(payload)?;
+        let value = rows::decode(payload)?;
         types::json_to_py(py, &value)
     }
 
     #[staticmethod]
     fn hint() -> String {
-        "Return in AGON text format: Start with @AGON text header, encode arrays as name[N]{fields} with tab-delimited rows".to_string()
+        "Return in AGON rows format: Start with @AGON rows header, encode arrays as name[N]{fields} with tab-delimited rows".to_string()
     }
 
     fn __repr__(&self) -> String {
-        "AGONText()".to_string()
+        "AGONRows()".to_string()
     }
 }
 
@@ -400,7 +400,7 @@ fn encode_all_parallel(data: &Bound<'_, PyAny>) -> PyResult<Vec<EncodingResult>>
 #[pymodule]
 fn agon_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<AGONFormat>()?;
-    m.add_class::<AGONText>()?;
+    m.add_class::<AGONRows>()?;
     m.add_class::<AGONColumns>()?;
     m.add_class::<AGONStruct>()?;
     m.add_class::<EncodingResult>()?;

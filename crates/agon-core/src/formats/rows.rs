@@ -1,9 +1,9 @@
-//! AGONText format encoder/decoder
+//! AGONRows format encoder/decoder
 //!
 //! Row-based encoding with tabular format for arrays of uniform objects.
 //!
 //! Format structure:
-//!     @AGON text
+//!     @AGON rows
 //!     @D=<delimiter>  # optional, default: \t
 //!     <data>
 
@@ -13,7 +13,7 @@ use std::sync::LazyLock;
 
 use crate::error::{AgonError, Result};
 
-const HEADER: &str = "@AGON text";
+const HEADER: &str = "@AGON rows";
 const DEFAULT_DELIMITER: &str = "\t";
 const INDENT: &str = "  ";
 
@@ -27,7 +27,7 @@ static KEY_VALUE_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^([^:]+):\s
 static NUMBER_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$").unwrap());
 
-/// Encode data to AGONText format
+/// Encode data to AGONRows format
 pub fn encode(data: &Value, include_header: bool) -> Result<String> {
     let mut lines = Vec::new();
     let delimiter = DEFAULT_DELIMITER;
@@ -42,7 +42,7 @@ pub fn encode(data: &Value, include_header: bool) -> Result<String> {
     Ok(lines.join("\n"))
 }
 
-/// Decode AGONText payload
+/// Decode AGONRows payload
 pub fn decode(payload: &str) -> Result<Value> {
     let lines: Vec<&str> = payload.lines().collect();
     if lines.is_empty() {
@@ -53,7 +53,7 @@ pub fn decode(payload: &str) -> Result<Value> {
 
     // Parse header
     let header_line = lines[idx].trim();
-    if !header_line.starts_with("@AGON text") {
+    if !header_line.starts_with("@AGON rows") {
         return Err(AgonError::DecodingError(format!(
             "Invalid header: {}",
             header_line
@@ -926,7 +926,7 @@ mod tests {
     fn test_encode_with_header() {
         let data = json!({"name": "test"});
         let encoded = encode(&data, true).unwrap();
-        assert!(encoded.starts_with("@AGON text"));
+        assert!(encoded.starts_with("@AGON rows"));
     }
 
     #[test]
@@ -1002,13 +1002,13 @@ mod tests {
 
     #[test]
     fn test_decode_header_only() {
-        let result = decode("@AGON text\n\n").unwrap();
+        let result = decode("@AGON rows\n\n").unwrap();
         assert!(result.is_null());
     }
 
     #[test]
     fn test_decode_simple_object() {
-        let payload = "@AGON text\n\nname: Alice\nage: 30";
+        let payload = "@AGON rows\n\nname: Alice\nage: 30";
         let decoded = decode(payload).unwrap();
         assert_eq!(decoded["name"], "Alice");
         assert_eq!(decoded["age"], 30);
@@ -1016,7 +1016,7 @@ mod tests {
 
     #[test]
     fn test_decode_tabular_array() {
-        let payload = "@AGON text\n\n[2]{id\tname}\n1\tAlice\n2\tBob";
+        let payload = "@AGON rows\n\n[2]{id\tname}\n1\tAlice\n2\tBob";
         let decoded = decode(payload).unwrap();
         assert!(decoded.is_array());
         let arr = decoded.as_array().unwrap();
@@ -1027,7 +1027,7 @@ mod tests {
 
     #[test]
     fn test_decode_named_tabular_array() {
-        let payload = "@AGON text\n\nusers[2]{id\tname}\n1\tAlice\n2\tBob";
+        let payload = "@AGON rows\n\nusers[2]{id\tname}\n1\tAlice\n2\tBob";
         let decoded = decode(payload).unwrap();
         assert!(decoded.is_object());
         let users = decoded["users"].as_array().unwrap();
@@ -1036,7 +1036,7 @@ mod tests {
 
     #[test]
     fn test_decode_primitive_array() {
-        let payload = "@AGON text\n\nnums[3]: 1\t2\t3";
+        let payload = "@AGON rows\n\nnums[3]: 1\t2\t3";
         let decoded = decode(payload).unwrap();
         let nums = decoded["nums"].as_array().unwrap();
         assert_eq!(nums.len(), 3);
@@ -1047,7 +1047,7 @@ mod tests {
 
     #[test]
     fn test_decode_custom_delimiter() {
-        let payload = "@AGON text\n@D=\\t\n\nname: test";
+        let payload = "@AGON rows\n@D=\\t\n\nname: test";
         let decoded = decode(payload).unwrap();
         assert_eq!(decoded["name"], "test");
     }

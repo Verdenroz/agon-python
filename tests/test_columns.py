@@ -387,7 +387,7 @@ class TestAGONColumnsIntegration:
         self, simple_data: list[dict[str, Any]]
     ) -> None:
         result = AGON.encode(simple_data, format="auto")
-        assert result.format in ("json", "text", "columns", "struct")
+        assert result.format in ("json", "rows", "columns", "struct")
 
 
 class TestAGONColumnsErrors:

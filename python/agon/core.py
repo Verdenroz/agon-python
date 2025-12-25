@@ -2,12 +2,6 @@
 
 AGON (Adaptive Guarded Object Notation) is a self-describing, token-efficient
 encoding for lists of JSON objects, optimized for LLM consumption.
-
-Core features:
-    - Key elimination: objects become positional rows with inline schema.
-    - Recursive encoding: nested arrays of objects are also encoded.
-    - Adaptive: automatically selects the best format for token efficiency.
-    - Self-describing: no training or config required.
 """
 
 from __future__ import annotations
@@ -20,23 +14,15 @@ if TYPE_CHECKING:
 
 import orjson
 
-# Rust format classes (primary API - inherit from AGONFormat)
-from agon.agon_core import (
-    AGONColumns,
-    AGONFormat,
-    AGONStruct,
-    AGONText,
-)
-from agon.agon_core import (
-    encode_auto_parallel as _rs_encode_auto_parallel,
-)
+# Rust py03 bindings
+from agon.agon_core import AGONColumns, AGONFormat, AGONRows, AGONStruct
+from agon.agon_core import encode_auto_parallel as _rs_encode_auto_parallel
 from agon.encoding import DEFAULT_ENCODING, count_tokens
 from agon.errors import AGONError
 
-# Python format classes (for reference/fallback)
-
-Format = Literal["auto", "json", "text", "columns", "struct"]
-ConcreteFormat = Literal["json", "text", "columns", "struct"]
+# Type aliases
+Format = Literal["auto", "json", "rows", "columns", "struct"]
+ConcreteFormat = Literal["json", "rows", "columns", "struct"]
 
 
 @dataclass(frozen=True)
@@ -84,7 +70,7 @@ class AGON:
 
     Formats:
         - "json": Raw JSON (baseline)
-        - "text": AGONText row-based format
+        - "rows": AGONRows row-based format
         - "columns": AGONColumns columnar format for wide tables
         - "struct": AGONStruct template format for repeated object shapes
 
@@ -98,7 +84,7 @@ class AGON:
     # Format headers (for decoding)
     _headers: ClassVar[dict[ConcreteFormat, str]] = {
         "json": "",
-        "text": "@AGON text",
+        "rows": "@AGON rows",
         "columns": "@AGON columns",
         "struct": "@AGON struct",
     }
@@ -106,14 +92,14 @@ class AGON:
     # Encoders - Rust for AGON formats, orjson for JSON
     _encoders: ClassVar[dict[ConcreteFormat, Callable[[Any], str]]] = {
         "json": lambda data: orjson.dumps(data).decode(),
-        "text": lambda data: str(AGONText.encode(data, include_header=False)),
+        "rows": lambda data: str(AGONRows.encode(data, include_header=False)),
         "columns": lambda data: str(AGONColumns.encode(data, include_header=False)),
         "struct": lambda data: str(AGONStruct.encode(data, include_header=False)),
     }
 
     # Decoders - Rust for AGON formats
     _decoders: ClassVar[dict[str, Callable[[str], Any]]] = {
-        "@AGON text": AGONText.decode,
+        "@AGON rows": AGONRows.decode,
         "@AGON columns": AGONColumns.decode,
         "@AGON struct": AGONStruct.decode,
     }
@@ -134,7 +120,7 @@ class AGON:
             format: Format to use:
                 - "auto": Select best format based on token count (default)
                 - "json": Raw JSON
-                - "text": AGONText row-based format
+                - "rows": AGONRows row-based format
                 - "columns": AGONColumns columnar format for wide tables
                 - "struct": AGONStruct template format for repeated shapes
             force: If True with format="auto", always use a non-JSON format.
@@ -213,7 +199,7 @@ class AGON:
         match format:
             case "json":
                 return AGON._decode_json(text)
-            case "text" | "columns" | "struct":
+            case "rows" | "columns" | "struct":
                 header = AGON._headers[format]
                 if not text.startswith(header):
                     text = f"{header}\n\n{text}"
@@ -268,7 +254,7 @@ class AGON:
         Example:
             >>> result = AGON.encode(data, format="auto")
             >>> AGON.hint(result)  # Generation instruction for selected format
-            'Return in AGON text format: Start with @AGON text header, encode arrays as name[N]{fields} with tab-delimited rows'
+            'Return in AGON rows format: Start with @AGON rows header, encode arrays as name[N]{fields} with tab-delimited rows'
             >>> AGON.hint("columns")  # Generation instruction for columns format
             'Return in AGON columns format: Start with @AGON columns header, transpose arrays to name[N] with ├/└ field: val1, val2, ...'
         """
@@ -281,8 +267,8 @@ class AGON:
 
         # Return hint for specific format
         match format_name:
-            case "text":
-                return AGONText.hint()
+            case "rows":
+                return AGONRows.hint()
             case "columns":
                 return AGONColumns.hint()
             case "struct":

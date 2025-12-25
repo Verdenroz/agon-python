@@ -1,6 +1,6 @@
-"""Tests for AGONText format.
+"""Tests for AGONRows format.
 
-Tests encoding and decoding of the AGONText row-based format.
+Tests encoding and decoding of the AGONRows row-based format.
 """
 
 from __future__ import annotations
@@ -10,24 +10,24 @@ from typing import Any
 
 import pytest
 
-from agon import AGON, AGONText
+from agon import AGON, AGONRows
 
 
-class TestAGONTextBasic:
+class TestAGONRowsBasic:
     """Basic encoding/decoding tests."""
 
     def test_encode_simple_object(self) -> None:
         data = {"name": "Alice", "age": 30, "active": True}
-        encoded = AGONText.encode(data, include_header=True)
-        assert "@AGON text" in encoded
+        encoded = AGONRows.encode(data, include_header=True)
+        assert "@AGON rows" in encoded
         assert "name: Alice" in encoded
         assert "age: 30" in encoded
         assert "active: true" in encoded
 
     def test_encode_decode_roundtrip_simple(self) -> None:
         data = {"name": "Alice", "age": 30}
-        encoded = AGONText.encode(data, include_header=True)
-        decoded = AGONText.decode(encoded)
+        encoded = AGONRows.encode(data, include_header=True)
+        decoded = AGONRows.decode(encoded)
         assert decoded == data
 
     def test_encode_decode_roundtrip_nested(self) -> None:
@@ -38,22 +38,22 @@ class TestAGONTextBasic:
                 "city": "Seattle",
             },
         }
-        encoded = AGONText.encode(data, include_header=True)
-        decoded = AGONText.decode(encoded)
+        encoded = AGONRows.encode(data, include_header=True)
+        decoded = AGONRows.decode(encoded)
         assert decoded == data
 
     def test_empty_object_roundtrip(self) -> None:
         data: dict[str, Any] = {}
-        encoded = AGONText.encode(data, include_header=True)
-        decoded = AGONText.decode(encoded)
+        encoded = AGONRows.encode(data, include_header=True)
+        decoded = AGONRows.decode(encoded)
         assert decoded == {} or decoded is None
 
 
-class TestAGONTextTabular:
+class TestAGONRowsTabular:
     """Tests for tabular array encoding (uniform objects)."""
 
     def test_encode_tabular_array(self, simple_data: list[dict[str, Any]]) -> None:
-        encoded = AGONText.encode(simple_data, include_header=True)
+        encoded = AGONRows.encode(simple_data, include_header=True)
         assert "[3]{" in encoded  # Array header with 3 elements
         assert "id\tname\trole" in encoded or "id" in encoded
 
@@ -61,7 +61,7 @@ class TestAGONTextTabular:
         # Named array at root level - decodes to object with array value
         payload = textwrap.dedent(
             """\
-            @AGON text
+            @AGON rows
 
             products[3]{sku\tname\tprice}
             A123\tWidget\t9.99
@@ -69,7 +69,7 @@ class TestAGONTextTabular:
             C789\tGizmo\t29.99
             """
         )
-        decoded = AGONText.decode(payload)
+        decoded = AGONRows.decode(payload)
         assert "products" in decoded
         products = decoded["products"]
         assert len(products) == 3
@@ -81,7 +81,7 @@ class TestAGONTextTabular:
         # Unnamed array at root - decodes to bare array
         payload = textwrap.dedent(
             """\
-            @AGON text
+            @AGON rows
 
             [3]{sku\tname\tprice}
             A123\tWidget\t9.99
@@ -89,19 +89,19 @@ class TestAGONTextTabular:
             C789\tGizmo\t29.99
             """
         )
-        decoded = AGONText.decode(payload)
+        decoded = AGONRows.decode(payload)
         assert len(decoded) == 3
         assert decoded[0] == {"sku": "A123", "name": "Widget", "price": 9.99}
 
     def test_roundtrip_tabular_array(self, simple_data: list[dict[str, Any]]) -> None:
-        encoded = AGONText.encode(simple_data, include_header=True)
-        decoded = AGONText.decode(encoded)
+        encoded = AGONRows.encode(simple_data, include_header=True)
+        decoded = AGONRows.decode(encoded)
         assert decoded == simple_data
 
     def test_tabular_with_missing_values(self) -> None:
         payload = textwrap.dedent(
             """\
-            @AGON text
+            @AGON rows
 
             users[3]{id\tname\temail}
             1\tAlice\talice@example.com
@@ -109,7 +109,7 @@ class TestAGONTextTabular:
             3\t\tcarol@example.com
             """
         )
-        decoded = AGONText.decode(payload)
+        decoded = AGONRows.decode(payload)
         users = decoded["users"]
         assert len(users) == 3
         assert users[0] == {"id": 1, "name": "Alice", "email": "alice@example.com"}
@@ -117,61 +117,61 @@ class TestAGONTextTabular:
         assert users[2] == {"id": 3, "email": "carol@example.com"}  # Missing name
 
 
-class TestAGONTextPrimitiveArrays:
+class TestAGONRowsPrimitiveArrays:
     """Tests for primitive array encoding."""
 
     def test_encode_primitive_array(self) -> None:
         data = {"tags": ["admin", "ops", "dev"]}
-        encoded = AGONText.encode(data, include_header=True)
+        encoded = AGONRows.encode(data, include_header=True)
         assert "[3]:" in encoded
 
     def test_decode_primitive_array(self) -> None:
         payload = textwrap.dedent(
             """\
-            @AGON text
+            @AGON rows
 
             tags[4]: admin\tops\tdev\tuser
             """
         )
-        decoded = AGONText.decode(payload)
+        decoded = AGONRows.decode(payload)
         assert decoded == {"tags": ["admin", "ops", "dev", "user"]}
 
     def test_roundtrip_primitive_array(self) -> None:
         data = {"numbers": [1, 2, 3, 4, 5]}
-        encoded = AGONText.encode(data, include_header=True)
-        decoded = AGONText.decode(encoded)
+        encoded = AGONRows.encode(data, include_header=True)
+        decoded = AGONRows.decode(encoded)
         assert decoded == data
 
     def test_decode_primitive_array_with_escaped_quote(self) -> None:
         payload = textwrap.dedent(
             """\
-            @AGON text
+            @AGON rows
 
             vals[2]: "a\\\"b"\t"c"
             """
         )
-        assert AGONText.decode(payload) == {"vals": ['a"b', "c"]}
+        assert AGONRows.decode(payload) == {"vals": ['a"b', "c"]}
 
     def test_empty_array_roundtrip(self) -> None:
         data = {"items": []}
-        encoded = AGONText.encode(data, include_header=True)
+        encoded = AGONRows.encode(data, include_header=True)
         assert "items[0]:" in encoded
-        decoded = AGONText.decode(encoded)
+        decoded = AGONRows.decode(encoded)
         assert decoded == {"items": []}
 
 
-class TestAGONTextMixedArrays:
+class TestAGONRowsMixedArrays:
     """Tests for mixed-type array encoding (list format)."""
 
     def test_encode_mixed_array(self) -> None:
         data = {"items": [42, "hello", True, None]}
-        encoded = AGONText.encode(data, include_header=True)
+        encoded = AGONRows.encode(data, include_header=True)
         assert "items[4]:" in encoded
 
     def test_decode_list_array_with_objects(self) -> None:
         payload = textwrap.dedent(
             """\
-            @AGON text
+            @AGON rows
 
             records[2]:
               - name: Alice
@@ -180,7 +180,7 @@ class TestAGONTextMixedArrays:
                 age: 25
             """
         )
-        decoded = AGONText.decode(payload)
+        decoded = AGONRows.decode(payload)
         records = decoded["records"]
         assert len(records) == 2
         assert records[0] == {"name": "Alice", "age": 30}
@@ -189,71 +189,71 @@ class TestAGONTextMixedArrays:
     def test_decode_list_array_header_with_no_inline_values(self) -> None:
         payload = textwrap.dedent(
             """\
-            @AGON text
+            @AGON rows
 
             vals[2]:
               - 1
               - 2
             """
         )
-        assert AGONText.decode(payload) == {"vals": [1, 2]}
+        assert AGONRows.decode(payload) == {"vals": [1, 2]}
 
     def test_parses_newline_delimiter_header(self) -> None:
         # Delimiter may not be used in the body, but header parsing should accept it.
         payload = textwrap.dedent(
             """\
-            @AGON text
+            @AGON rows
             @D=\\n
 
             s: "x"
             """
         )
-        assert AGONText.decode(payload) == {"s": "x"}
+        assert AGONRows.decode(payload) == {"s": "x"}
 
     def test_parses_tab_delimiter_header(self) -> None:
         payload = textwrap.dedent(
             """\
-            @AGON text
+            @AGON rows
             @D=\\t
 
             s: "x"
             """
         )
-        assert AGONText.decode(payload) == {"s": "x"}
+        assert AGONRows.decode(payload) == {"s": "x"}
 
     def test_quotes_strings_that_look_like_primitives(self) -> None:
         data = {"b": "true", "n": "123", "z": "null"}
-        encoded = AGONText.encode(data, include_header=True)
+        encoded = AGONRows.encode(data, include_header=True)
         assert 'b: "true"' in encoded
         assert 'n: "123"' in encoded
         assert 'z: "null"' in encoded
-        assert AGONText.decode(encoded) == data
+        assert AGONRows.decode(encoded) == data
 
     def test_special_floats_decode_as_none(self) -> None:
         data = {"nan": float("nan"), "inf": float("inf"), "ninf": float("-inf")}
-        decoded = AGONText.decode(AGONText.encode(data, include_header=True))
+        decoded = AGONRows.decode(AGONRows.encode(data, include_header=True))
         assert decoded["nan"] is None
         assert decoded["inf"] is None
         assert decoded["ninf"] is None
 
 
-class TestAGONTextPrimitives:
+class TestAGONRowsPrimitives:
     """Tests for primitive value handling."""
 
     def test_encode_null(self) -> None:
         data = {"value": None}
-        encoded = AGONText.encode(data, include_header=True)
+        encoded = AGONRows.encode(data, include_header=True)
         assert "value: null" in encoded
 
     def test_encode_booleans(self) -> None:
         data = {"active": True, "deleted": False}
-        encoded = AGONText.encode(data, include_header=True)
+        encoded = AGONRows.encode(data, include_header=True)
         assert "active: true" in encoded
         assert "deleted: false" in encoded
 
     def test_encode_numbers(self) -> None:
         data = {"integer": 42, "float": 3.14, "negative": -17}
-        encoded = AGONText.encode(data, include_header=True)
+        encoded = AGONRows.encode(data, include_header=True)
         assert "integer: 42" in encoded
         assert "float: 3.14" in encoded
         assert "negative: -17" in encoded
@@ -261,14 +261,14 @@ class TestAGONTextPrimitives:
     def test_encode_special_floats(self) -> None:
         # NaN and Infinity should become null
         data = {"nan": float("nan"), "inf": float("inf")}
-        encoded = AGONText.encode(data, include_header=True)
+        encoded = AGONRows.encode(data, include_header=True)
         assert "nan: null" in encoded
         assert "inf: null" in encoded
 
     def test_decode_primitives(self) -> None:
         payload = textwrap.dedent(
             """\
-            @AGON text
+            @AGON rows
 
             value: 42
             name: Alice
@@ -276,43 +276,43 @@ class TestAGONTextPrimitives:
             missing: null
             """
         )
-        decoded = AGONText.decode(payload)
+        decoded = AGONRows.decode(payload)
         assert decoded == {"value": 42, "name": "Alice", "active": True, "missing": None}
 
 
-class TestAGONTextQuoting:
+class TestAGONRowsQuoting:
     """Tests for string quoting rules."""
 
     def test_quote_string_with_delimiter(self) -> None:
-        data = {"text": "hello\tworld"}
-        encoded = AGONText.encode(data, include_header=True)
+        data = {"rows": "hello\tworld"}
+        encoded = AGONRows.encode(data, include_header=True)
         assert '"hello\\tworld"' in encoded or '"' in encoded
 
     def test_quote_string_with_leading_space(self) -> None:
-        data = {"text": " leading space"}
-        encoded = AGONText.encode(data, include_header=True)
+        data = {"rows": " leading space"}
+        encoded = AGONRows.encode(data, include_header=True)
         assert '" leading space"' in encoded
 
     def test_quote_string_with_special_char(self) -> None:
         data = {"tag": "@mention"}
-        encoded = AGONText.encode(data, include_header=True)
+        encoded = AGONRows.encode(data, include_header=True)
         assert '"@mention"' in encoded
 
     def test_quote_string_looks_like_number(self) -> None:
         data = {"code": "42"}
-        encoded = AGONText.encode(data, include_header=True)
+        encoded = AGONRows.encode(data, include_header=True)
         assert '"42"' in encoded
 
     def test_roundtrip_quoted_strings(self) -> None:
-        data = {"text": 'Say "hello"', "path": "C:\\Users"}
-        encoded = AGONText.encode(data, include_header=True)
-        decoded = AGONText.decode(encoded)
+        data = {"rows": 'Say "hello"', "path": "C:\\Users"}
+        encoded = AGONRows.encode(data, include_header=True)
+        decoded = AGONRows.decode(encoded)
         assert decoded == data
 
     def test_long_and_unicode_string_roundtrip(self) -> None:
-        data = {"text": "Hello 世界 🌍" + ("x" * 1000)}
-        encoded = AGONText.encode(data, include_header=True)
-        decoded = AGONText.decode(encoded)
+        data = {"rows": "Hello 世界 🌍" + ("x" * 1000)}
+        encoded = AGONRows.encode(data, include_header=True)
+        decoded = AGONRows.decode(encoded)
         assert decoded == data
 
     def test_roundtrip_string_escaping_newlines_and_whitespace(self) -> None:
@@ -322,12 +322,12 @@ class TestAGONTextQuoting:
             "newline": "x\ny",
             "special": "@tag",
         }
-        encoded = AGONText.encode([data], include_header=True)
-        decoded = AGONText.decode(encoded)
+        encoded = AGONRows.encode([data], include_header=True)
+        decoded = AGONRows.decode(encoded)
         assert decoded == [data]
 
 
-class TestAGONTextNesting:
+class TestAGONRowsNesting:
     """Tests for nested structures."""
 
     def test_nested_object(self) -> None:
@@ -340,19 +340,19 @@ class TestAGONTextNesting:
                 },
             },
         }
-        encoded = AGONText.encode(data, include_header=True)
-        decoded = AGONText.decode(encoded)
+        encoded = AGONRows.encode(data, include_header=True)
+        decoded = AGONRows.decode(encoded)
         assert decoded == data
 
     def test_array_inside_object(self, nested_data: list[dict[str, Any]]) -> None:
-        encoded = AGONText.encode(nested_data, include_header=True)
-        decoded = AGONText.decode(encoded)
+        encoded = AGONRows.encode(nested_data, include_header=True)
+        decoded = AGONRows.decode(encoded)
         assert decoded == nested_data
 
     def test_decode_object_with_named_arrays(self) -> None:
         payload = textwrap.dedent(
             """\
-            @AGON text
+            @AGON rows
 
             root:
               nums[2]: 1\t2
@@ -365,7 +365,7 @@ class TestAGONTextNesting:
                     z: 2
             """
         )
-        assert AGONText.decode(payload) == {
+        assert AGONRows.decode(payload) == {
             "root": {
                 "nums": [1, 2],
                 "rows": [{"a": 1, "b": 2}, {"a": 3, "b": 4}],
@@ -374,47 +374,47 @@ class TestAGONTextNesting:
         }
 
 
-class TestAGONTextIntegration:
+class TestAGONRowsIntegration:
     """Integration tests with AGON core."""
 
-    def test_agon_encode_text_format(self, simple_data: list[dict[str, Any]]) -> None:
-        result = AGON.encode(simple_data, format="text")
-        assert result.format == "text"
-        assert result.header == "@AGON text"
+    def test_agon_encode_rows_format(self, simple_data: list[dict[str, Any]]) -> None:
+        result = AGON.encode(simple_data, format="rows")
+        assert result.format == "rows"
+        assert result.header == "@AGON rows"
 
-    def test_agon_decode_detects_text_format(self, simple_data: list[dict[str, Any]]) -> None:
-        encoded = AGONText.encode(simple_data, include_header=True)
+    def test_agon_decode_detects_rows_format(self, simple_data: list[dict[str, Any]]) -> None:
+        encoded = AGONRows.encode(simple_data, include_header=True)
         decoded = AGON.decode(encoded)
         assert decoded == simple_data
 
     def test_agon_decode_encoding_directly(self, simple_data: list[dict[str, Any]]) -> None:
-        result = AGON.encode(simple_data, format="text")
+        result = AGON.encode(simple_data, format="rows")
         decoded = AGON.decode(result)
         assert decoded == simple_data
 
-    def test_agon_auto_includes_text_in_candidates(self, simple_data: list[dict[str, Any]]) -> None:
-        # Encode with auto should consider text format
+    def test_agon_auto_includes_rows_in_candidates(self, simple_data: list[dict[str, Any]]) -> None:
+        # Encode with auto should consider rows format
         result = AGON.encode(simple_data, format="auto")
-        # Result could be any format, but text should have been considered
-        assert result.format in ("json", "text", "columns", "struct")
+        # Result could be any format, but rows should have been considered
+        assert result.format in ("json", "rows", "columns", "struct")
 
 
-class TestAGONTextErrors:
+class TestAGONRowsErrors:
     """Error handling tests."""
 
     def test_invalid_header(self) -> None:
         with pytest.raises(ValueError):
-            AGONText.decode("not a valid header")
+            AGONRows.decode("not a valid header")
 
     def test_empty_payload(self) -> None:
         with pytest.raises(ValueError):
-            AGONText.decode("")
+            AGONRows.decode("")
 
 
-class TestAGONTextHint:
+class TestAGONRowsHint:
     """Test hint method."""
 
     def test_hint_returns_string(self) -> None:
-        hint = AGONText.hint()
+        hint = AGONRows.hint()
         assert isinstance(hint, str)
-        assert "AGON text" in hint
+        assert "AGON rows" in hint
