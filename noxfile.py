@@ -21,7 +21,7 @@ def lint(session: nox.Session) -> None:
 @nox.session(python=PYTHON_VERSIONS)
 def unit(session: nox.Session) -> None:
     """Run unit tests."""
-    session.install(".", "pytest", "pytest-cov", "pytest-sugar")
+    session.install(".", "pytest", "pytest-cov", "pytest-sugar", "pytest-xdist", "tiktoken")
     session.run(
         "pytest",
         "--cov=agon",
