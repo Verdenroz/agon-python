@@ -17,7 +17,7 @@ flowchart TD
     A[Start: Encode data with auto mode]
 
     A --> B[Compact JSON baseline]
-    A --> C[AGONText format]
+    A --> C[AGONRows format]
     A --> D[AGONColumns format]
     A --> E[AGONStruct format]
 
@@ -41,7 +41,7 @@ flowchart TD
 **The 5-step process:**
 
 1. **Baseline**: Encode data to compact JSON and count tokens
-2. **Try specialized formats**: Encode with AGONText, AGONColumns, and AGONStruct
+2. **Try specialized formats**: Encode with AGONRows, AGONColumns, and AGONStruct
 3. **Measure**: Count tokens for each specialized format
 4. **Compare**: Calculate savings percentage vs JSON baseline
 5. **Decide**:
@@ -121,7 +121,7 @@ AGON provides three encoding formats, each optimized for different data shapes:
 
 ### Format Comparison
 
-#### AGONText
+#### AGONRows
 **Row-based tabular encoding**
 
 ```agon
@@ -182,7 +182,7 @@ change: FR("+5", 5.0)
 
 Different data shapes naturally favor different formats:
 
-=== "Uniform Arrays → Text"
+=== "Uniform Arrays → Rows"
 
     ```python
     data = [
@@ -192,7 +192,7 @@ Different data shapes naturally favor different formats:
     ]
 
     result = AGON.encode(data, format="auto")
-    # → Selects "text" format
+    # → Selects "rows" format
     #
     # [3]{id	name	score}
     # 1	Alice	95
@@ -200,7 +200,7 @@ Different data shapes naturally favor different formats:
     # 3	Charlie	92
     ```
 
-    **Why text wins:** Consistent structure, few fields, perfect for row-based encoding.
+    **Why rows wins:** Consistent structure, few fields, perfect for row-based encoding.
 
 === "Wide Tables → Columns"
 
@@ -265,9 +265,9 @@ print(result.format)  # → "json"
 |--------|--------|-------------------|--------------------|
 | Pretty JSON | 142,791 | baseline | -55.9% (worse) |
 | **Compact JSON** | **91,634** | +35.8% | **baseline** |
-| AGONText | 113,132 | +20.8% | -23.4% (worse) |
+| AGONRows | 113,132 | +20.8% | -23.4% (worse) |
 | AGONColumns | 113,132 | +20.8% | -23.4% (worse) |
-| AGONStruct | 89,011 | +37.7% | **+2.9%** (below threshold) |
+| AGONStruct | 89,012 | +37.7% | **+2.9%** (below threshold) |
 | **Auto Selection** | **91,634** | +35.8% | **0%** (safe fallback) |
 
 !!! success "Safety Net in Action"
@@ -293,9 +293,9 @@ AGON and TOON are complementary approaches to JSON encoding:
 | **Best For** | Uniform arrays, consistent pipelines | Variable data shapes, risk-averse optimization |
 | **Token Efficiency** | 40-60% savings on good matches | 30-60% savings with safety guarantee |
 
-### When They Produce Identical Output
+### When They Produce Nearly Identical Output
 
-For uniform arrays, `AGONText` and TOON produce **near identical output**:
+For uniform arrays, `AGONRows` and TOON produce **nearly identical output**:
 
 === "TOON Output"
 
@@ -311,7 +311,7 @@ For uniform arrays, `AGONText` and TOON produce **near identical output**:
     3,Wildflower Loop,5.1,180,sam,true
     ```
 
-=== "AGON Text Output"
+=== "AGON Rows Output"
 
     ```agon
     context:
@@ -325,7 +325,7 @@ For uniform arrays, `AGONText` and TOON produce **near identical output**:
     3	Wildflower Loop	5.1	180	sam	true
     ```
 
-**The only difference is AGONText uses the `\t` delimiter**
+**The only difference:** AGONRows uses tabs while TOON uses commas as delimiters
 
 Both: 96 tokens (+58.1% savings vs pretty JSON, +30.9% vs compact JSON)
 
@@ -351,7 +351,7 @@ Both: 96 tokens (+58.1% savings vs pretty JSON, +30.9% vs compact JSON)
 AGON provides maximum value in these scenarios:
 
 - **Variable data pipelines** where data shape changes between requests
-- **Uniform arrays** with consistent fields (AGONText: 40-60% savings)
+- **Uniform arrays** with consistent fields (AGONRows: 40-60% savings)
 - **Wide tables** with 10+ columns (AGONColumns: 50-70% savings)
 - **Repeated nested patterns** like market data with `{fmt, raw}` everywhere (AGONStruct: 30-50% savings)
 - **Cost-sensitive applications** where every token counts
@@ -386,7 +386,7 @@ Detailed documentation of all methods and parameters
 
 View how JSON is used as a safety net
 
-### [AGONText Format](formats/text.md)
+### [AGONRows Format](formats/rows.md)
 
 Complete guide to row-based encoding
 

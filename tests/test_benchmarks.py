@@ -99,10 +99,28 @@ def test_fixture_benchmark(fixture_path: Path) -> None:
     raw_json = orjson.dumps(records, option=orjson.OPT_INDENT_2).decode()
     raw_tokens = count_tokens(raw_json)
 
+    # Test compact JSON (baseline for comparison table)
+    compact_json = orjson.dumps(records).decode()
+    compact_tokens = count_tokens(compact_json)
+
+    t0 = time.perf_counter()
+    orjson.dumps(records)
+    compact_encode_ms = (time.perf_counter() - t0) * 1000
+
+    t0 = time.perf_counter()
+    orjson.loads(orjson.dumps(records))
+    compact_decode_ms = (time.perf_counter() - t0) * 1000
+
+    # Calculate compact JSON savings vs pretty JSON
+    compact_savings = (1 - compact_tokens / max(1, raw_tokens)) * 100
+
     # Test each format individually
     format_results: dict[
         str, tuple[int, float, float, float]
     ] = {}  # tokens, savings, encode_ms, decode_ms
+
+    # Add compact JSON as baseline
+    format_results["json"] = (compact_tokens, compact_savings, compact_encode_ms, compact_decode_ms)
 
     for fmt, encoder, decoder in [
         ("rows", lambda data: AGON.encode(data, format="rows"), AGON.decode),  # type: ignore[misc]

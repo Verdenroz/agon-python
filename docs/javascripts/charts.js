@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
             stack: 'baseline'
           },
           {
-            label: 'AGONText',
+            label: 'AGONRows',
             data: textSavings,
             backgroundColor: textColors,
             borderColor: colors.text,

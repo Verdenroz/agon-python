@@ -40,7 +40,7 @@ nav:
   - API: api.md
   - Formats:
       - JSON: formats/json.md
-      - Text: formats/text.md
+      - Rows: formats/rows.md
       - Columns: formats/columns.md
       - Struct: formats/struct.md
   - Benchmarks: benchmarks.md
@@ -60,7 +60,6 @@ markdown_extensions:
       custom_fences:
         - name: mermaid
           class: mermaid
-          format: pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.details
