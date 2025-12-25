@@ -1,4 +1,4 @@
-# AGONText Format
+# AGONRows Format
 
 Row-based tabular encoding for uniform arrays—AGON's most commonly selected format.
 
@@ -6,7 +6,7 @@ Row-based tabular encoding for uniform arrays—AGON's most commonly selected fo
 
 ## Overview
 
-AGONText is a **row-based encoding format** optimized for uniform arrays of objects with consistent field structure. It's similar to TOON's approach and produces identical output for uniform arrays.
+AGONRows is a **row-based encoding format** optimized for uniform arrays of objects with consistent field structure. It's similar to TOON's approach and produces nearly identical output for uniform arrays (tabs vs commas as delimiters).
 
 **Best for:**
 
@@ -31,7 +31,7 @@ Let's encode a simple user list:
     ]
     ```
 
-=== "Output (AGONText)"
+=== "Output (AGONRows)"
 
     ```
     [3]{id	name	role}
@@ -84,10 +84,10 @@ value1	value2	value3
 **Custom delimiter:**
 
 ```python
-from agon.formats import AGONText
+from agon import AGONRows
 
 # Use pipe delimiter instead of tab
-encoded = AGONText.encode(data, delimiter="|")
+encoded = AGONRows.encode(data, delimiter="|")
 ```
 
 ---
@@ -96,7 +96,7 @@ encoded = AGONText.encode(data, delimiter="|")
 
 ### Primitives
 
-AGONText infers types from content—no type markers needed:
+AGONRows infers types from content—no type markers needed:
 
 | Type | Example Input | Encoded Output |
 |------|--------------|----------------|
@@ -215,7 +215,7 @@ Real-world data from `toon.json`:
     }
     ```
 
-=== "Output (AGONText)"
+=== "Output (AGONRows)"
 
     ```
     context:
@@ -235,13 +235,13 @@ Real-world data from `toon.json`:
     |--------|--------|---------|
     | Pretty JSON | 229 | baseline |
     | Compact JSON | 139 | +39.3% |
-    | **AGONText** | **96** | **+58.1%** |
+    | **AGONRows** | **96** | **+58.1%** |
 
     **30.9% savings** vs compact JSON!
 
 ---
 
-## When AGONText Wins
+## When AGONRows Wins
 
 - **Uniform arrays** with 3+ records having identical field structure
 - **Consistent field types** (all records have same fields with same types)
@@ -254,7 +254,7 @@ Real-world data from `toon.json`:
 
 ---
 
-## When AGONText Loses
+## When AGONRows Loses
 
 - **Wide tables** (10+ fields) → AGONColumns wins (type clustering)
 - **Irregular structure** (fields vary between records) → JSON fallback
@@ -284,26 +284,26 @@ result = AGON.encode(employee_data, format="auto")
 
 ## Direct Usage
 
-For advanced use cases, use AGONText encoder directly:
+For advanced use cases, use AGONRows encoder directly:
 
 ```python
-from agon.formats import AGONText
+from agon import AGONRows
 
 # Encode with default options
-encoded = AGONText.encode(data)
+encoded = AGONRows.encode(data)
 
 # Custom delimiter
-encoded = AGONText.encode(data, delimiter="|")
+encoded = AGONRows.encode(data, delimiter="|")
 
 # Without header (for LLM prompts)
-encoded = AGONText.encode(data, include_header=False)
+encoded = AGONRows.encode(data, include_header=False)
 
 # With header (for decoding)
-encoded_with_header = AGONText.encode(data, include_header=True)
-# → @AGON text\n\n[3]{id...}
+encoded_with_header = AGONRows.encode(data, include_header=True)
+# → @AGON rows\n\n[3]{id...}
 
 # Decode
-decoded = AGONText.decode(encoded)
+decoded = AGONRows.decode(encoded)
 assert decoded == data  # Lossless
 ```
 
@@ -316,7 +316,7 @@ assert decoded == data  # Lossless
     ```python
     data = []
 
-    result = AGON.encode(data, format="text")
+    result = AGON.encode(data, format="rows")
     # → [0]{}
     ```
 
@@ -325,7 +325,7 @@ assert decoded == data  # Lossless
     ```python
     data = [{"id": 1, "name": "Alice"}]
 
-    result = AGON.encode(data, format="text")
+    result = AGON.encode(data, format="rows")
     # → [1]{id	name}
     #   1	Alice
     ```
@@ -335,7 +335,7 @@ assert decoded == data  # Lossless
     ```python
     data = [{"a": None, "b": None}]
 
-    result = AGON.encode(data, format="text")
+    result = AGON.encode(data, format="rows")
     # → [1]{a	b}
     #
     ```
@@ -347,7 +347,7 @@ assert decoded == data  # Lossless
     ```python
     data = [{"name": "Alice\tBob", "quote": "He said \"hi\""}]
 
-    result = AGON.encode(data, format="text")
+    result = AGON.encode(data, format="rows")
     # → [1]{name	quote}
     #   "Alice\tBob"	"He said \"hi\""
     ```
@@ -358,7 +358,7 @@ assert decoded == data  # Lossless
 
 ## Comparison with TOON
 
-For uniform arrays, AGONText and TOON produce **near identical output**:
+For uniform arrays, AGONRows and TOON produce **near identical output**:
 
 === "JSON"
 
@@ -379,7 +379,7 @@ For uniform arrays, AGONText and TOON produce **near identical output**:
     3,Charlie,user
     ```
 
-=== "AGONText"
+=== "AGONRows"
 
     ```agon
     [3]{id	name	role}
@@ -391,7 +391,7 @@ For uniform arrays, AGONText and TOON produce **near identical output**:
 
 Both achieve the same token savings vs JSON.
 
-**TOON and AGONText are near identical! The only difference is AGONText uses the `\t` delimiter.**
+**TOON and AGONRows are nearly identical!** The only difference is that AGONRows uses tabs (`\t`) while TOON uses commas (`,`) as delimiters.
 
 ---
 
@@ -413,14 +413,14 @@ Both achieve the same token savings vs JSON.
 
 ??? question "Can I customize the delimiter?"
 
-    Yes! Use AGONText encoder directly:
+    Yes! Use AGONRows encoder directly:
 
     ```python
-    from agon.formats import AGONText
-    encoded = AGONText.encode(data, delimiter="|")
+    from agon import AGONRows
+    encoded = AGONRows.encode(data, delimiter="|")
     ```
 
-??? question "Does AGONText handle nested objects?"
+??? question "Does AGONRows handle nested objects?"
 
     Yes, with indentation:
 
@@ -433,7 +433,7 @@ Both achieve the same token savings vs JSON.
     #   age: 28
     ```
 
-??? question "Is AGONText the same as TOON?"
+??? question "Is AGONRows the same as TOON?"
 
     **For uniform arrays:** Yes, near identical output.
 
@@ -453,7 +453,7 @@ Learn about template-based encoding
 
 ### [Benchmarks](../benchmarks.md)
 
-See AGONText performance on real datasets
+See AGONRows performance on real datasets
 
 ### [API Reference](../api.md)
 

@@ -42,6 +42,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
       - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v6
         with:
@@ -78,6 +81,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: llvm-tools-preview
+
       - name: Set up Python 3.13
         uses: actions/setup-python@v6
         with:
@@ -100,12 +108,30 @@ jobs:
       - name: Combine coverage data and display human readable report
         run: nox --session=coverage
 
-      - name: Create coverage report
+      - name: Create Python coverage report
         run: nox --session=coverage -- xml
 
-      - name: Upload coverage report
+      # Rust coverage
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
+
+      - name: Generate Rust coverage
+        run: cargo llvm-cov --manifest-path crates/agon-core/Cargo.toml --lcov --output-path rust-coverage.lcov
+
+      - name: Upload Python coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
+          files: coverage.xml
+          flags: python
           name: agon-python
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
+
+      - name: Upload Rust coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: rust-coverage.lcov
+          flags: rust
+          name: agon-rust
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true

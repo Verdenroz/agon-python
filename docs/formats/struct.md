@@ -59,7 +59,7 @@ Let's encode market data with a repeated `{fmt, raw}` pattern:
     |--------|--------|---------|
     | **Pretty JSON** | **128** | **baseline** |
     | Compact JSON | 75 | +41.4% |
-    | AGONText | 90 | +29.7% |
+    | AGONRows | 90 | +29.7% |
     | **AGONStruct** | **73** | **+43.0%** |
 
     **Why struct wins:** The repeated `{fmt, raw}` pattern appears 5 times. Traditional formats repeat both field names (`"fmt"` and `"raw"`) in every instance. AGONStruct defines the template once, then each instance only contains values—eliminating 10 redundant field name repetitions.
@@ -167,7 +167,7 @@ AGONStruct automatically detects repeated object patterns with:
 - **Primitive values only:** Nested objects/arrays don't create structs
 
 ```python
-from agon.formats import AGONStruct
+from agon import AGONStruct
 
 # Detect patterns with 5+ occurrences (more aggressive)
 encoded = AGONStruct.encode(data, min_occurrences=5)
@@ -295,7 +295,7 @@ Real-world financial quote data:
     |--------|--------|---------|
     | Pretty JSON | 285 | baseline |
     | Compact JSON | 167 | +41.4% |
-    | AGONText | 197 | +30.9% |
+    | AGONRows | 197 | +30.9% |
     | **AGONStruct** | **153** | **+46.3%** |
 
     **Why struct wins:** The `{fmt, raw}` pattern appears 7 times. Template definition costs ~10 tokens, but saves ~6 tokens per instance. At 7 instances, savings are `7 × 6 - 10 = 32 tokens`.
@@ -321,7 +321,7 @@ Real-world financial quote data:
 - **Few fields** (1 field objects) → No savings from template
 - **Irregular nested structures** → Can't identify consistent pattern
 - **Deeply nested objects** → Struct only works for shallow primitives
-- **Array-heavy data** → AGONText or AGONColumns better
+- **Array-heavy data** → AGONRows or AGONColumns better
 
 **Example where template overhead hurts:**
 
@@ -348,7 +348,7 @@ result = AGON.encode(data, format="auto")
 For advanced use cases, use AGONStruct encoder directly:
 
 ```python
-from agon.formats import AGONStruct
+from agon import AGONStruct
 
 # Encode with default options (min_occurrences=3, min_fields=2)
 encoded = AGONStruct.encode(data)
@@ -489,7 +489,7 @@ assert decoded == data  # Lossless
 
 For the same market data with 5 `{fmt, raw}` instances:
 
-=== "AGONText (No Template)"
+=== "AGONRows (No Template)"
 
     ```
     price:
@@ -525,7 +525,7 @@ For the same market data with 5 `{fmt, raw}` instances:
 
     **Tokens:** 73 (`fmt` and `raw` defined once in template, eliminated from instances)
 
-**Key difference:** AGONText repeats field names in every nested object. AGONStruct defines template once, then instances reference it by name with positional values.
+**Key difference:** AGONRows repeats field names in every nested object. AGONStruct defines template once, then instances reference it by name with positional values.
 
 ---
 
@@ -554,7 +554,7 @@ For the same market data with 5 `{fmt, raw}` instances:
     Yes! Use the encoder directly:
 
     ```python
-    from agon.formats import AGONStruct
+    from agon import AGONStruct
 
     # Lower threshold (detect patterns with 2+ occurrences)
     encoded = AGONStruct.encode(data, min_occurrences=2)
@@ -607,7 +607,7 @@ For the same market data with 5 `{fmt, raw}` instances:
 
 ## Next Steps
 
-### [AGONText Format](text.md)
+### [AGONRows Format](rows.md)
 
 Learn about row-based encoding for flat arrays
 

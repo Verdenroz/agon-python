@@ -20,7 +20,7 @@ AGON.encode(
     format: Format = "auto",
     force: bool = False,
     min_savings: float = 0.10,
-    encoding: str = "o200k_base"
+    encoding: Encoding | None = None
 ) -> AGONEncoding
 ```
 
@@ -29,10 +29,10 @@ AGON.encode(
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `data` | `object` | *required* | JSON-serializable Python data to encode |
-| `format` | `Format` | `"auto"` | Format to use: `"auto"`, `"json"`, `"text"`, `"columns"`, `"struct"` |
+| `format` | `Format` | `"auto"` | Format to use: `"auto"`, `"json"`, `"rows"`, `"columns"`, `"struct"` |
 | `force` | `bool` | `False` | If True with `format="auto"`, never fall back to JSON |
 | `min_savings` | `float` | `0.10` | Minimum token savings (0.0-1.0) required to use specialized format vs JSON |
-| `encoding` | `str` | `"o200k_base"` | Token encoding to use for counting (tiktoken encoding name) |
+| `encoding` | `Encoding | None` | `None` | Token encoding for accurate counting (e.g., `"o200k_base"`). If `None`, uses fast byte-length estimation |
 
 **Returns:** `AGONEncoding` - Result object with encoded text and metadata
 
@@ -50,7 +50,7 @@ AGON.encode(
 
     # Auto-select best format
     result = AGON.encode(data, format="auto")
-    print(f"Selected: {result.format}")  # → "text"
+    print(f"Selected: {result.format}")  # → "rows"
     print(f"Tokens: {AGON.count_tokens(result.text)}")
     print(result)  # Use directly in LLM prompts
     ```
@@ -59,7 +59,7 @@ AGON.encode(
 
     ```python
     # Force a specific format
-    result_text = AGON.encode(data, format="text")
+    result_rows = AGON.encode(data, format="rows")
     result_columns = AGON.encode(data, format="columns")
     result_struct = AGON.encode(data, format="struct")
     result_json = AGON.encode(data, format="json")
@@ -108,7 +108,7 @@ AGON.decode(payload: str, format: ConcreteFormat | None = None) -> object
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `payload` | `AGONEncoding \| str` | *required* | Encoded data to decode |
-| `format` | `ConcreteFormat \| None` | `None` | Optional format override (`"json"`, `"text"`, `"columns"`, `"struct"`) |
+| `format` | `ConcreteFormat \| None` | `None` | Optional format override (`"json"`, `"rows"`, `"columns"`, `"struct"`) |
 
 **Returns:** `object` - Decoded Python data (list, dict, etc.)
 
@@ -120,7 +120,7 @@ AGON.decode(payload: str, format: ConcreteFormat | None = None) -> object
     data = [{"id": 1, "name": "Alice"}]
 
     # Encode
-    result = AGON.encode(data, format="text")
+    result = AGON.encode(data, format="rows")
 
     # Decode - automatically uses result's format
     decoded = AGON.decode(result)
@@ -131,13 +131,13 @@ AGON.decode(payload: str, format: ConcreteFormat | None = None) -> object
 
     ```python
     # AGON-encoded string with header
-    agon_string = """@AGON text
+    agon_string = """@AGON rows
 
     [2]{id	name}
     1	Alice
     2	Bob"""
 
-    # Auto-detects "text" format from @AGON header
+    # Auto-detects "rows" format from @AGON header
     decoded = AGON.decode(agon_string)
     # → [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]
     ```
@@ -146,11 +146,11 @@ AGON.decode(payload: str, format: ConcreteFormat | None = None) -> object
 
     ```python
     # Decode without header by specifying format
-    agon_text_without_header = """[2]{id	name}
+    agon_rows_without_header = """[2]{id	name}
     1	Alice
     2	Bob"""
 
-    decoded = AGON.decode(agon_text_without_header, format="text")
+    decoded = AGON.decode(agon_rows_without_header, format="rows")
     # → [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]
     ```
 
@@ -242,77 +242,6 @@ AGON.project_data(
 
 ---
 
-### AGON.hint()
-
-Get prescriptive generation instructions for LLMs (experimental feature for asking LLMs to return AGON-formatted data).
-
-**Signature:**
-
-```python
-AGON.hint(
-    result_or_format: AGONEncoding | ConcreteFormat
-) -> str
-```
-
-**Parameters:**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `result_or_format` | `AGONEncoding \| ConcreteFormat` | Encoding result or format name (`"text"`, `"columns"`, `"struct"`, `"json"`) |
-
-**Returns:** `str` - Prescriptive hint instructing how to generate the format
-
-**Examples:**
-
-=== "From Encoding Result"
-
-    ```python
-    data = [{"id": 1, "name": "Alice"}]
-    result = AGON.encode(data, format="auto")
-
-    # Get hint for the selected format
-    hint = AGON.hint(result)
-    print(hint)
-    # → "Return in AGON text format: Start with @AGON text header,
-    #    encode arrays as name[N]{fields} with tab-delimited rows"
-    ```
-
-=== "From Format Name"
-
-    ```python
-    # Get hint for specific format
-    hint_text = AGON.hint("text")
-    hint_columns = AGON.hint("columns")
-    hint_struct = AGON.hint("struct")
-    ```
-
-=== "Use in LLM Prompts"
-
-    ```python
-    data = [{"id": 1, "name": "Alice", "role": "admin"}]
-    result = AGON.encode(data, format="auto")
-
-    # Ask LLM to respond in AGON format
-    prompt = f"""Analyze this data and return enriched results in AGON format.
-
-    Instructions: {AGON.hint(result)}
-
-    Example output:
-    {result.with_header()}
-
-    Task: Add a "seniority" field (junior/mid/senior) based on role.
-    """
-    ```
-
-!!! warning "Experimental Feature"
-
-    LLMs have **not** been trained on AGON format, so generation accuracy cannot be guaranteed. This is experimental—always validate LLM-generated AGON data.
-
-    **Prefer:** Sending AGON to LLMs (reliable)
-    **Over:** Asking LLMs to generate AGON (experimental)
-
----
-
 ### AGON.count_tokens()
 
 Count tokens in text using the specified encoding.
@@ -322,7 +251,7 @@ Count tokens in text using the specified encoding.
 ```python
 AGON.count_tokens(
     text: str,
-    encoding: str = "o200k_base"
+    encoding: Encoding = "o200k_base"
 ) -> int
 ```
 
@@ -331,7 +260,7 @@ AGON.count_tokens(
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `text` | `str` | *required* | Text to count tokens for |
-| `encoding` | `str` | `"o200k_base"` | Tiktoken encoding name |
+| `encoding` | `Encoding` | `"o200k_base"` | Tiktoken encoding name (`"o200k_base"`, `"cl100k_base"`, etc.) |
 
 **Returns:** `int` - Number of tokens
 
@@ -356,9 +285,9 @@ Result object returned by `AGON.encode()`.
 
 | Attribute | Type | Description |
 |-----------|------|-------------|
-| `format` | `ConcreteFormat` | Format used: `"json"`, `"text"`, `"columns"`, `"struct"` |
+| `format` | `ConcreteFormat` | Format used: `"json"`, `"rows"`, `"columns"`, `"struct"` |
 | `text` | `str` | Encoded output (ready for LLM prompts) |
-| `header` | `str` | Format header (e.g., `"@AGON text"`) |
+| `header` | `str` | Format header (e.g., `"@AGON rows"`) |
 
 **Methods:**
 
@@ -367,7 +296,7 @@ Result object returned by `AGON.encode()`.
 Returns the encoded text (without header) for direct use in prompts.
 
 ```python
-result = AGON.encode(data, format="text")
+result = AGON.encode(data, format="rows")
 prompt = f"Analyze this data:\n\n{result}"  # Converts to string via __str__()
 ```
 
@@ -376,7 +305,7 @@ prompt = f"Analyze this data:\n\n{result}"  # Converts to string via __str__()
 Returns character count of the encoded text.
 
 ```python
-result = AGON.encode(data, format="text")
+result = AGON.encode(data, format="rows")
 char_count = len(result)  # Character count
 ```
 
@@ -385,9 +314,9 @@ char_count = len(result)  # Character count
 Returns debug representation.
 
 ```python
-result = AGON.encode(data, format="text")
+result = AGON.encode(data, format="rows")
 print(repr(result))
-# → AGONEncoding(format='text', length=45)
+# → AGONEncoding(format='rows', length=45)
 ```
 
 ### with_header()
@@ -395,7 +324,7 @@ print(repr(result))
 Returns encoded text with header prepended (for auto-detect decoding).
 
 ```python
-result = AGON.encode(data, format="text")
+result = AGON.encode(data, format="rows")
 
 # Without header (for sending to LLM)
 print(result.text)
@@ -405,7 +334,7 @@ print(result.text)
 
 # With header (for decoding)
 print(result.with_header())
-# → @AGON text
+# → @AGON rows
 #
 #   [2]{id	name}
 #   1	Alice
@@ -417,32 +346,71 @@ print(result.with_header())
 - **Without header** (`result.text` or `str(result)`): Send to LLM prompts
 - **With header** (`result.with_header()`): Store for later decoding, or ask LLM to return in same format
 
+### hint()
+
+Get prescriptive generation instructions for LLMs (experimental feature for asking LLMs to return AGON-formatted data).
+
+```python
+result = AGON.encode(data, format="auto")
+
+# Get hint for the selected format
+hint = result.hint()
+print(hint)
+# → "Return in AGON rows format: Start with @AGON rows header,
+#    encode arrays as name[N]{fields} with tab-delimited rows"
+```
+
+**Example use in LLM prompts:**
+
+```python
+data = [{"id": 1, "name": "Alice", "role": "admin"}]
+result = AGON.encode(data, format="auto")
+
+# Ask LLM to respond in AGON format
+prompt = f"""Analyze this data and return enriched results in AGON format.
+
+Instructions: {result.hint()}
+
+Example output:
+{result.with_header()}
+
+Task: Add a "seniority" field (junior/mid/senior) based on role.
+"""
+```
+
+!!! warning "Experimental Feature"
+
+    LLMs have **not** been trained on AGON format, so generation accuracy cannot be guaranteed. This is experimental—always validate LLM-generated AGON data.
+
+    **Prefer:** Sending AGON to LLMs (reliable)
+    **Over:** Asking LLMs to generate AGON (experimental)
+
 ---
 
 ## Format-Specific Encoders
 
 For advanced use cases, you can access format-specific encoders directly.
 
-### AGONText
+### AGONRows
 
 ```python
-from agon.formats import AGONText
+from agon import AGONRows
 
 # Direct encoding with custom options
-encoded = AGONText.encode(
+encoded = AGONRows.encode(
     data,
     delimiter="\t",  # Default: tab
     include_header=False  # Default: False
 )
 
 # Direct decoding
-decoded = AGONText.decode(encoded)
+decoded = AGONRows.decode(encoded)
 ```
 
 ### AGONColumns
 
 ```python
-from agon.formats import AGONColumns
+from agon import AGONColumns
 
 # Direct encoding
 encoded = AGONColumns.encode(
@@ -457,7 +425,7 @@ decoded = AGONColumns.decode(encoded)
 ### AGONStruct
 
 ```python
-from agon.formats import AGONStruct
+from agon import AGONStruct
 
 # Direct encoding
 encoded = AGONStruct.encode(
@@ -476,7 +444,7 @@ decoded = AGONStruct.decode(encoded)
     - You need format-specific options (custom delimiters)
     - You're benchmarking or comparing formats
 
-    For most use cases, `AGON.encode(data, format="text")` is preferred.
+    For most use cases, `AGON.encode(data, format="rows")` is preferred.
 
 ---
 
@@ -499,17 +467,17 @@ except AGONError as e:
 
 ### Format-Specific Exceptions
 
-- `AGONTextError` - Errors specific to AGONText format
+- `AGONRowsError` - Errors specific to AGONRows format
 - `AGONColumnsError` - Errors specific to AGONColumns format
 - `AGONStructError` - Errors specific to AGONStruct format
 
 ```python
-from agon import AGONTextError, AGONColumnsError, AGONStructError
+from agon import AGONRowsError, AGONColumnsError, AGONStructError
 
 try:
-    result = AGON.decode(malformed_agon_text, format="text")
-except AGONTextError as e:
-    print(f"Text format error: {e}")
+    result = AGON.decode(malformed_agon_rows, format="rows")
+except AGONRowsError as e:
+    print(f"Rows format error: {e}")
 ```
 
 ---
@@ -527,13 +495,23 @@ except AGONTextError as e:
 ## Type Aliases
 
 ```python
-from agon import Format, ConcreteFormat
+from agon import Format, ConcreteFormat, Encoding
 
 # Format includes "auto"
-Format = Literal["auto", "json", "text", "columns", "struct"]
+Format = Literal["auto", "json", "rows", "columns", "struct"]
 
 # ConcreteFormat excludes "auto" (actual encoding formats)
-ConcreteFormat = Literal["json", "text", "columns", "struct"]
+ConcreteFormat = Literal["json", "rows", "columns", "struct"]
+
+# Encoding - supported tiktoken encodings
+Encoding = Literal[
+    "o200k_base",      # GPT-4o, o1, o3
+    "o200k_harmony",   # GPT-OSS
+    "cl100k_base",     # GPT-4, GPT-3.5-turbo
+    "p50k_base",       # Codex, text-davinci-003
+    "p50k_edit",       # text-davinci-edit-001
+    "r50k_base",       # GPT-3 (davinci, curie, babbage, ada)
+]
 ```
 
 ---
@@ -544,7 +522,7 @@ ConcreteFormat = Literal["json", "text", "columns", "struct"]
 
 View how JSON is used as a safety net
 
-### [AGONText Format](formats/text.md)
+### [AGONRows Format](formats/rows.md)
 
 Complete guide to row-based encoding
 

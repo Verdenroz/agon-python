@@ -6,7 +6,7 @@ Understanding when and why AGON returns compact JSON.
 
 ## What is JSON Fallback?
 
-JSON fallback is AGON's safety mechanism—when specialized formats (Text, Columns, Struct) don't provide sufficient token savings, auto mode returns **compact JSON** instead.
+JSON fallback is AGON's safety mechanism—when specialized formats (Rows, Columns, Struct) don't provide sufficient token savings, auto mode returns **compact JSON** instead.
 
 This is **a feature, not a failure**. It's the guarantee that makes `format="auto"` safe to use everywhere.
 
@@ -124,7 +124,7 @@ When should you expect JSON vs specialized formats?
 
 | Data Characteristic | Expected Format |
 |---------------------|-----------------|
-| Uniform array, 3-10 fields | **Text** |
+| Uniform array, 3-10 fields | **Rows** |
 | Uniform array, 10+ fields | **Columns** |
 | Repeated nested `{a, b}` pattern (3+ times) | **Struct** |
 | Mixed types, inconsistent structure | **JSON** |
@@ -186,7 +186,7 @@ When should you expect JSON vs specialized formats?
 
 ## Next Steps
 
-### [AGONText Format](text.md)
+### [AGONRows Format](rows.md)
 
 Learn about the most common specialized format
 

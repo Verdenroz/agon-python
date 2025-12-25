@@ -99,13 +99,31 @@ def test_fixture_benchmark(fixture_path: Path) -> None:
     raw_json = orjson.dumps(records, option=orjson.OPT_INDENT_2).decode()
     raw_tokens = count_tokens(raw_json)
 
+    # Test compact JSON (baseline for comparison table)
+    compact_json = orjson.dumps(records).decode()
+    compact_tokens = count_tokens(compact_json)
+
+    t0 = time.perf_counter()
+    orjson.dumps(records)
+    compact_encode_ms = (time.perf_counter() - t0) * 1000
+
+    t0 = time.perf_counter()
+    orjson.loads(orjson.dumps(records))
+    compact_decode_ms = (time.perf_counter() - t0) * 1000
+
+    # Calculate compact JSON savings vs pretty JSON
+    compact_savings = (1 - compact_tokens / max(1, raw_tokens)) * 100
+
     # Test each format individually
     format_results: dict[
         str, tuple[int, float, float, float]
     ] = {}  # tokens, savings, encode_ms, decode_ms
 
+    # Add compact JSON as baseline
+    format_results["json"] = (compact_tokens, compact_savings, compact_encode_ms, compact_decode_ms)
+
     for fmt, encoder, decoder in [
-        ("text", lambda data: AGON.encode(data, format="text"), AGON.decode),  # type: ignore[misc]
+        ("rows", lambda data: AGON.encode(data, format="rows"), AGON.decode),  # type: ignore[misc]
         ("columns", lambda data: AGON.encode(data, format="columns"), AGON.decode),  # type: ignore[misc]
         ("struct", lambda data: AGON.encode(data, format="struct"), AGON.decode),  # type: ignore[misc]
     ]:
@@ -126,26 +144,33 @@ def test_fixture_benchmark(fixture_path: Path) -> None:
 
         format_results[fmt] = (tokens, savings, encode_ms, decode_ms)
 
-    # Test auto selection
+    # Test auto selection with timing
+    t0 = time.perf_counter()
     result = AGON.encode(records, format="auto")
+    auto_encode_ms = (time.perf_counter() - t0) * 1000
     auto_tokens = count_tokens(result.text)
     auto_savings = (1 - auto_tokens / max(1, raw_tokens)) * 100
 
     # Verify auto decode (decode AGONEncoding directly)
+    t0 = time.perf_counter()
     decoded = AGON.decode(result)
+    auto_decode_ms = (time.perf_counter() - t0) * 1000
     assert normalize_floats(decoded) == normalize_floats(records), "auto roundtrip failed"
 
     # Print results
     record_count = len(records) if isinstance(records, list) else 1
-    print(f"\n{'=' * 60}")
+    print(f"\n{'=' * 70}")
     print(f"FIXTURE: {label}")
-    print(f"Bytes: {fixture_path.stat().st_size:,}  Records: {record_count:,}")
+    print(f"Size: {fixture_path.stat().st_size / 1024:.1f} KB  Records: {record_count:,}")
     print(f"JSON baseline (pretty): {raw_tokens:,} tokens")
-    print(f"{'-' * 60}")
-    print(f"{'Format':<10} {'Tokens':>8} {'Savings':>10} {'Encode':>10} {'Decode':>10}")
-    print(f"{'-' * 60}")
+    print(f"{'-' * 70}")
+    print(f"{'Format':<10} {'Tokens':>8} {'Savings':>10} {'Encode':>12} {'Decode':>12}")
+    print(f"{'-' * 70}")
     for fmt, (tokens, savings, enc_ms, dec_ms) in format_results.items():
-        print(f"{fmt:<10} {tokens:>8,} {savings:>+9.1f}% {enc_ms:>9.2f}ms {dec_ms:>9.2f}ms")
-    print(f"{'-' * 60}")
-    print(f"{'auto':<10} {auto_tokens:>8,} {auto_savings:>+9.1f}% (selected: {result.format})")
-    print(f"{'=' * 60}")
+        print(f"{fmt:<10} {tokens:>8,} {savings:>+9.1f}% {enc_ms:>11.2f}ms {dec_ms:>11.2f}ms")
+    print(f"{'-' * 70}")
+    print(
+        f"{'auto':<10} {auto_tokens:>8,} {auto_savings:>+9.1f}% {auto_encode_ms:>11.2f}ms {auto_decode_ms:>11.2f}ms"
+    )
+    print(f"Selected: {result.format}")
+    print(f"{'=' * 70}")

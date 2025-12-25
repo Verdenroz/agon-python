@@ -16,28 +16,55 @@ repos:
       - id: detect-private-key
       - id: debug-statements
 
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.9
+  # Python: codespell
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
     hooks:
-      - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
-      - id: ruff-format
+      - id: codespell
+        args: ["--write-changes", "--skip", "*.lock,*.json"]
+        files: ^(python|tests|devtools|docs)/|^README\.md$
 
+  # Python: ruff check + format
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.10
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+        files: ^(python|tests|devtools)/
+      - id: ruff-format
+        files: ^(python|tests|devtools)/
+
+  # Python: basedpyright
   - repo: local
     hooks:
       - id: basedpyright
         name: basedpyright (uv)
         entry: uv run basedpyright
         language: system
-        args: [src]
+        args: [python, tests, devtools]
         pass_filenames: false
 
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
+  # Rust: cargo fmt
+  - repo: local
     hooks:
-      - id: codespell
-        args: ["--skip", "*.lock,*.json"]
+      - id: cargo-fmt
+        name: cargo fmt
+        entry: cargo fmt --manifest-path crates/agon-core/Cargo.toml --
+        language: system
+        types: [rust]
+        pass_filenames: true
 
+  # Rust: cargo clippy
+  - repo: local
+    hooks:
+      - id: cargo-clippy
+        name: cargo clippy
+        entry: cargo clippy --manifest-path crates/agon-core/Cargo.toml --all-targets --fix --allow-dirty --allow-staged -- -D warnings
+        language: system
+        types: [rust]
+        pass_filenames: false
+
+  # CI: GitHub workflows and actions
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.30.0
     hooks:

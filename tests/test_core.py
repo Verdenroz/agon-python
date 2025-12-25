@@ -1,7 +1,7 @@
 """Tests for the AGON core API.
 
 These tests target `agon.core` behavior (format selection, dispatch, and helpers).
-Format-specific behavior lives in `tests/test_text.py`.
+Format-specific behavior lives in `tests/test_rows.py`.
 """
 
 from __future__ import annotations
@@ -11,8 +11,7 @@ from typing import Any
 import orjson
 import pytest
 
-from agon import AGON, AGONError
-from agon.formats.text import AGONText
+from agon import AGON, AGONError, AGONRows
 
 
 def test_encode_json_format_returns_json() -> None:
@@ -21,11 +20,11 @@ def test_encode_json_format_returns_json() -> None:
     assert orjson.loads(result.text) == data
 
 
-def test_encode_text_format_uses_header() -> None:
+def test_encode_rows_format_uses_header() -> None:
     data: dict[str, Any] = {"a": 1, "b": "x"}
-    result = AGON.encode(data, format="text")
-    assert result.format == "text"
-    assert result.header == "@AGON text"
+    result = AGON.encode(data, format="rows")
+    assert result.format == "rows"
+    assert result.header == "@AGON rows"
 
 
 def test_encode_routes_to_specific_formats(simple_data: list[dict[str, Any]]) -> None:
@@ -33,9 +32,9 @@ def test_encode_routes_to_specific_formats(simple_data: list[dict[str, Any]]) ->
     assert res_json.format == "json"
     assert isinstance(orjson.loads(res_json.text), list)
 
-    res_text = AGON.encode(simple_data, format="text")
-    assert res_text.format == "text"
-    assert res_text.header == "@AGON text"
+    res_rows = AGON.encode(simple_data, format="rows")
+    assert res_rows.format == "rows"
+    assert res_rows.header == "@AGON rows"
 
 
 def test_encode_struct_includes_definitions_without_header() -> None:
@@ -51,8 +50,8 @@ def test_encode_struct_includes_definitions_without_header() -> None:
     assert "@FR: fmt, raw" in result.text
 
 
-def test_decode_detects_text_payload() -> None:
-    payload = AGONText.encode({"x": 1})
+def test_decode_detects_rows_payload() -> None:
+    payload = AGONRows.encode({"x": 1}, include_header=True)
     assert AGON.decode(payload) == {"x": 1}
 
 
@@ -74,7 +73,7 @@ def test_decode_invalid_non_json_string_raises() -> None:
 def test_decode_agon_encoding_directly() -> None:
     """Test decoding AGONEncoding directly."""
     data = [{"id": 1, "name": "Alice"}]
-    result = AGON.encode(data, format="text")
+    result = AGON.encode(data, format="rows")
     # Decode AGONEncoding directly
     decoded = AGON.decode(result)
     assert decoded == data
@@ -83,7 +82,7 @@ def test_decode_agon_encoding_directly() -> None:
 def test_decode_with_format_parameter() -> None:
     """Test decoding with explicit format (no header needed)."""
     data = [{"id": 1, "name": "Alice"}]
-    result = AGON.encode(data, format="text")
+    result = AGON.encode(data, format="rows")
     # Decode using format parameter
     decoded = AGON.decode(result.text, format=result.format)
     assert decoded == data
@@ -95,64 +94,62 @@ def test_project_data_delegates() -> None:
 
 
 def test_hint_with_agon_encoding_result() -> None:
-    """hint() should accept AGONEncoding and return prescriptive generation instructions."""
+    """AGONEncoding.hint() should return prescriptive generation instructions."""
     data = [{"id": 1, "name": "Alice"}]
-    result = AGON.encode(data, format="text")
-    hint = AGON.hint(result)
+    result = AGON.encode(data, format="rows")
+    hint = result.hint()
     assert isinstance(hint, str)
-    assert "Return in AGON text format" in hint
-    assert "@AGON text header" in hint
+    assert "Return in AGON rows format" in hint
+    assert "@AGON rows header" in hint
 
 
-def test_hint_with_format_string_text() -> None:
-    """hint() should accept format string and return generation instructions."""
-    hint = AGON.hint("text")
+def test_hint_rows_format() -> None:
+    """hint() should return rows format instructions."""
+    result = AGON.encode({"a": 1}, format="rows")
+    hint = result.hint()
     assert isinstance(hint, str)
-    assert "Return in AGON text format" in hint
-    assert "@AGON text header" in hint
+    assert "Return in AGON rows format" in hint
+    assert "@AGON rows header" in hint
     assert "name[N]{fields}" in hint
 
 
-def test_hint_with_format_string_columns() -> None:
-    """hint() should return prescriptive columns format instructions."""
-    hint = AGON.hint("columns")
+def test_hint_columns_format() -> None:
+    """hint() should return columns format instructions."""
+    result = AGON.encode([{"id": 1}], format="columns")
+    hint = result.hint()
     assert isinstance(hint, str)
     assert "Return in AGON columns format" in hint
     assert "@AGON columns header" in hint
     assert "├/└" in hint
 
 
-def test_hint_with_format_string_struct() -> None:
-    """hint() should return prescriptive struct format instructions."""
-    hint = AGON.hint("struct")
+def test_hint_struct_format() -> None:
+    """hint() should return struct format instructions."""
+    result = AGON.encode({"a": {"fmt": "1", "raw": 1}}, format="struct")
+    hint = result.hint()
     assert isinstance(hint, str)
     assert "Return in AGON struct format" in hint
     assert "@AGON struct header" in hint
     assert "@Struct" in hint or "Struct(" in hint
 
 
-def test_hint_with_format_string_json() -> None:
+def test_hint_json_format() -> None:
     """hint() should return JSON format hint."""
-    hint = AGON.hint("json")
+    result = AGON.encode({"a": 1}, format="json")
+    hint = result.hint()
     assert isinstance(hint, str)
     assert "JSON" in hint
 
 
-def test_hint_with_unknown_format_raises() -> None:
-    """hint() should raise AGONError for unknown format."""
-    with pytest.raises(AGONError, match="Unknown format"):
-        AGON.hint("invalid_format")  # type: ignore[arg-type]
-
-
-def test_hint_matches_encoding_format() -> None:
-    """hint() should return matching hint for different encoded formats."""
+def test_hint_matches_across_formats() -> None:
+    """hint() should return consistent hints for each format."""
     data = [{"id": 1, "name": "Alice"}]
 
-    for fmt in ["text", "columns", "struct", "json"]:
+    for fmt in ["rows", "columns", "struct", "json"]:
         result = AGON.encode(data, format=fmt)  # type: ignore[arg-type]
-        hint_from_result = AGON.hint(result)
-        hint_from_string = AGON.hint(fmt)  # type: ignore[arg-type]
-        assert hint_from_result == hint_from_string
+        hint = result.hint()
+        assert isinstance(hint, str)
+        assert len(hint) > 0
 
 
 def test_count_tokens_positive() -> None:
@@ -207,14 +204,14 @@ def test_auto_format_selects_best() -> None:
     """Auto format should choose most token-efficient option."""
     data: list[dict[str, Any]] = [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]
     result = AGON.encode(data, format="auto")
-    assert result.format in ("json", "text", "columns", "struct")
+    assert result.format in ("json", "rows", "columns", "struct")
 
 
 def test_force_skips_json() -> None:
     """With force=True, auto should not select JSON."""
     data: dict[str, Any] = {"a": 1}
     result = AGON.encode(data, format="auto", force=True)
-    assert result.format == "text"
+    assert result.format == "rows"
 
 
 def test_auto_min_savings_can_fall_back_to_json() -> None:
@@ -250,6 +247,59 @@ def test_encode_reports_json_fallback() -> None:
     assert res.text.startswith("[")
 
 
+def test_encode_with_encoding_none_uses_fast_estimate() -> None:
+    """encoding=None (default) uses fast byte-length estimate."""
+    data = [{"id": i, "name": f"User{i}"} for i in range(10)]
+    result = AGON.encode(data, format="auto", encoding=None)
+    assert result.format in ("json", "rows", "columns", "struct")
+    assert len(result.text) > 0
+
+
+def test_encode_with_encoding_specified_uses_tiktoken() -> None:
+    """encoding='o200k_base' uses tiktoken for accurate token counting."""
+    data = [{"id": i, "name": f"User{i}"} for i in range(10)]
+    result = AGON.encode(data, format="auto", encoding="o200k_base")
+    assert result.format in ("json", "rows", "columns", "struct")
+    assert len(result.text) > 0
+
+
+def test_encode_both_encoding_modes_produce_valid_results() -> None:
+    """Both encoding modes should produce decodable results."""
+    data = [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]
+
+    # Fast estimate (default)
+    result_fast = AGON.encode(data, format="auto", encoding=None)
+    decoded_fast = AGON.decode(result_fast)
+    assert decoded_fast == data
+
+    # Tiktoken
+    result_tiktoken = AGON.encode(data, format="auto", encoding="o200k_base")
+    decoded_tiktoken = AGON.decode(result_tiktoken)
+    assert decoded_tiktoken == data
+
+
+def test_count_tokens_with_default_encoding() -> None:
+    """count_tokens uses o200k_base by default."""
+    tokens = AGON.count_tokens("hello world")
+    assert tokens > 0
+    assert isinstance(tokens, int)
+
+
+def test_count_tokens_with_different_encodings() -> None:
+    """count_tokens supports multiple tiktoken encodings."""
+    text = "The quick brown fox jumps over the lazy dog."
+
+    # Different encodings may produce different token counts
+    o200k = AGON.count_tokens(text, encoding="o200k_base")
+    cl100k = AGON.count_tokens(text, encoding="cl100k_base")
+
+    assert o200k > 0
+    assert cl100k > 0
+    # Token counts may differ between encodings
+    assert isinstance(o200k, int)
+    assert isinstance(cl100k, int)
+
+
 def test_agon_encoding_str_returns_text() -> None:
     """AGONEncoding str() returns the encoded text."""
     data = [{"id": 1}]
@@ -276,9 +326,9 @@ def test_agon_encoding_repr() -> None:
 def test_agon_encoding_with_header() -> None:
     """with_header() prepends header for auto-detect decoding."""
     data = [{"id": 1, "name": "Alice"}]
-    result = AGON.encode(data, format="text")
+    result = AGON.encode(data, format="rows")
     with_header = result.with_header()
-    assert with_header.startswith("@AGON text")
+    assert with_header.startswith("@AGON rows")
     # Can decode with auto-detect
     assert AGON.decode(with_header) == data
 

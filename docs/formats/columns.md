@@ -79,7 +79,7 @@ Let's encode a simple employee table with 12 fields:
     |--------|--------|---------|
     | **Pretty JSON** | **309** | **baseline** |
     | Compact JSON | 190 | +38.5% |
-    | AGONText | 137 | +55.7% |
+    | AGONRows | 137 | +55.7% |
     | **AGONColumns** | **158** | **+48.9%** |
 
     **Why columns helps:** With 12 fields, grouping by type (all IDs together, all names together) provides better compression than row-based format. For even wider tables (20+ fields), the advantage increases.
@@ -114,7 +114,7 @@ Let's encode a simple employee table with 12 fields:
 **ASCII mode:**
 
 ```python
-from agon.formats import AGONColumns
+from agon import AGONColumns
 
 # Use ASCII tree characters for compatibility
 encoded = AGONColumns.encode(data, use_ascii=True)
@@ -132,7 +132,7 @@ encoded = AGONColumns.encode(data, use_ascii=True)
 **Custom delimiter:**
 
 ```python
-from agon.formats import AGONColumns
+from agon import AGONColumns
 
 # Use comma-space delimiter
 encoded = AGONColumns.encode(data, delimiter=", ")
@@ -321,10 +321,10 @@ Real-world employee data:
     | Format | Tokens | Savings |
     |--------|--------|---------| | Pretty JSON | 381 | baseline |
     | Compact JSON | 231 | +39.4% |
-    | AGONText | 171 | +55.1% |
+    | AGONRows | 171 | +55.1% |
     | **AGONColumns** | **186** | **+51.2%** |
 
-    **Trade-off:** AGONText wins for this example (fewer fields), but as field count grows beyond 10, AGONColumns pulls ahead due to type clustering.
+    **Trade-off:** AGONRows wins for this example (fewer fields), but as field count grows beyond 10, AGONColumns pulls ahead due to type clustering.
 
 ---
 
@@ -342,7 +342,7 @@ Real-world employee data:
 
 ## When AGONColumns Loses
 
-- **Few fields** (2-5 fields) → AGONText wins with simpler row-based format
+- **Few fields** (2-5 fields) → AGONRows wins with simpler row-based format
 - **Highly irregular structure** (fields vary between records) → JSON fallback
 - **Deeply nested objects** with no arrays → AGONStruct or JSON
 - **Heterogeneous data** per column (mixed types) → Row-based better
@@ -369,7 +369,7 @@ result = AGON.encode(user_data, format="auto")
 For advanced use cases, use AGONColumns encoder directly:
 
 ```python
-from agon.formats import AGONColumns
+from agon import AGONColumns
 
 # Encode with default options
 encoded = AGONColumns.encode(data)
@@ -469,7 +469,7 @@ assert decoded == data  # Lossless
 
 For the same employee dataset with 12 fields:
 
-=== "AGONText (Row-Based)"
+=== "AGONRows (Row-Based)"
 
     ```
     [3]{id	name	email	age	city	state	zip	phone	dept	title	salary	start_date}
@@ -502,7 +502,7 @@ For the same employee dataset with 12 fields:
 
 **Decision factors:**
 
-- **2-10 fields:** Use AGONText (simpler, less overhead)
+- **2-10 fields:** Use AGONRows (simpler, less overhead)
 - **10-15 fields:** Borderline—auto mode chooses based on data
 - **15+ fields:** Use AGONColumns (type clustering advantage wins)
 
@@ -529,7 +529,7 @@ For the same employee dataset with 12 fields:
     Yes! Use ASCII mode for compatibility:
 
     ```python
-    from agon.formats import AGONColumns
+    from agon import AGONColumns
     encoded = AGONColumns.encode(data, use_ascii=True)
     # Uses | and ` instead of ├ and └
     ```
@@ -566,7 +566,7 @@ For the same employee dataset with 12 fields:
 
 ## Next Steps
 
-### [AGONText Format](text.md)
+### [AGONRows Format](rows.md)
 
 Learn about row-based encoding for narrow tables
 
