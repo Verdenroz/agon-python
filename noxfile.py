@@ -3,7 +3,7 @@
 import nox
 
 PYTHON_VERSIONS = ["3.11", "3.12", "3.13"]
-LOCATIONS = ["src", "tests"]
+LOCATIONS = ["python", "tests"]
 
 
 @nox.session(python=PYTHON_VERSIONS[-1])
@@ -14,8 +14,8 @@ def lint(session: nox.Session) -> None:
     session.install("ruff", "basedpyright", "codespell")
     session.run("ruff", "check", *LOCATIONS)
     session.run("ruff", "format", "--check", *LOCATIONS)
-    session.run("basedpyright", "src")
-    session.run("codespell", "src", "tests")
+    session.run("basedpyright", "python")
+    session.run("codespell", "python", "tests")
 
 
 @nox.session(python=PYTHON_VERSIONS)

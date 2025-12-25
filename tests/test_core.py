@@ -11,8 +11,7 @@ from typing import Any
 import orjson
 import pytest
 
-from agon import AGON, AGONError
-from agon.formats.text import AGONText
+from agon import AGON, AGONError, AGONText
 
 
 def test_encode_json_format_returns_json() -> None:
@@ -52,7 +51,7 @@ def test_encode_struct_includes_definitions_without_header() -> None:
 
 
 def test_decode_detects_text_payload() -> None:
-    payload = AGONText.encode({"x": 1})
+    payload = AGONText.encode({"x": 1}, include_header=True)
     assert AGON.decode(payload) == {"x": 1}
 
 
