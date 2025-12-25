@@ -5,8 +5,8 @@ from rich import get_console, reconfigure
 from rich import print as rprint
 
 # Update as needed.
-SRC_PATHS = ["src", "tests", "devtools"]
-DOC_PATHS = ["README.md"]
+SRC_PATHS = ["python", "tests", "devtools"]
+DOC_PATHS = ["README.md", "docs"]
 
 
 reconfigure(emoji=not get_console().options.legacy_windows)  # No emojis on legacy windows.
@@ -31,7 +31,7 @@ def main():
     if errcount != 0:
         rprint(f"[bold red]:x: Lint failed with {errcount} errors.[/bold red]")
     else:
-        rprint("[bold green]:white_check_mark: Lint passed![/bold green]")
+        rprint("[bold green]:white_check_mark: Python lint passed![/bold green]")
     rprint()
 
     return errcount

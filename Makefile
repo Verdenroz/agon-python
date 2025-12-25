@@ -5,40 +5,40 @@
 
 .PHONY: default install fix test nox upgrade build docs clean pre-commit help
 
-default: install fix test
+default: install build fix test
 
 install:
 	uv sync --dev
 
-fix:
-	uv run python devtools/lint.py
+build:
+	uv run maturin develop --manifest-path crates/agon-core/Cargo.toml
 
-test: install
-	uv run pytest tests -s
+fix:
+	uv run python devtools/lint_rust.py & uv run python devtools/lint_python.py & wait
+
+test: build
+	@echo "🦀 Running Rust tests with coverage..."
+	cargo llvm-cov --manifest-path crates/agon-core/Cargo.toml --fail-under-lines 70
+	cargo llvm-cov report --manifest-path crates/agon-core/Cargo.toml --lcov --output-path rust-coverage.lcov
+	@echo ""
+	@echo "🐍 Running Python tests with coverage..."
+	uv run pytest tests -v
+	@echo ""
 	@echo "✅ All tests passed"
 
-nox:
+nox: build
 	uv run nox
 
 upgrade:
 	uv sync --upgrade --dev
 
-build:
-	uv build
-
 docs: install
 	uv run mkdocs serve --livereload
 
 clean:
-	-rm -rf dist/
-	-rm -rf *.egg-info/
-	-rm -rf .pytest_cache/
-	-rm -rf .mypy_cache/
-	-rm -rf .nox/
-	-rm -rf .venv/
-	-rm -rf htmlcov/
-	-rm -rf .coverage*
-	-rm -rf coverage.xml
+	-rm -rf dist/ target/ *.egg-info/
+	-rm -rf .pytest_cache/ .mypy_cache/ .nox/ htmlcov/
+	-rm -rf .coverage* coverage.xml rust-coverage.lcov
 	-find . -type d -name "__pycache__" -exec rm -rf {} +
 
 pre-commit:
@@ -48,29 +48,20 @@ pre-commit:
 help:
 	@echo "AGON Development Makefile"
 	@echo ""
-	@echo "🚀 Quick Start:"
-	@echo "  make               - Install deps, lint, run tests"
+	@echo "Quick Start:"
+	@echo "  make               - Install, build Rust, lint, test"
+	@echo "  make test          - Build Rust and run tests"
 	@echo ""
-	@echo "📦 Installation:"
-	@echo "  make install       - Install all dependencies"
-	@echo "  make upgrade       - Upgrade all dependencies"
+	@echo "Development:"
+	@echo "  make install       - Install Python dependencies"
+	@echo "  make build         - Build and install Rust extension"
+	@echo "  make fix           - Format and lint (Python + Rust)"
 	@echo ""
-	@echo "🔍 Code Quality:"
-	@echo "  make fix           - Auto-fix linting and formatting issues"
-	@echo "  make pre-commit    - Install and run pre-commit hooks"
+	@echo "Testing:"
+	@echo "  make test          - Run Rust + Python tests with coverage"
+	@echo "  make nox           - Run nox sessions (builds Rust first)"
 	@echo ""
-	@echo "🧪 Testing:"
-	@echo "  make test          - Run all tests (single Python version)"
-	@echo "  make test-unit     - Run unit tests (single Python version)"
-	@echo "  make nox           - Run all nox sessions (all Python versions)"
-	@echo "  make nox-unit      - Run unit tests (all Python versions)"
-	@echo "  make nox-lint      - Run lint session via nox"
-	@echo ""
-	@echo "🧹 Cleanup:"
-	@echo "  make clean         - Clean build/cache files"
-	@echo ""
-	@echo "🔧 Build:"
-	@echo "  make build         - Build distribution packages"
-	@echo ""
-	@echo "📚 Docs:"
-	@echo "  make docs          - Serve docs locally (http://127.0.0.1:8000/)"
+	@echo "Other:"
+	@echo "  make docs          - Serve docs locally"
+	@echo "  make clean         - Clean build artifacts"
+	@echo "  make upgrade       - Upgrade dependencies"
