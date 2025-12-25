@@ -468,10 +468,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#quick-example" class="md-nav__link">
+  <a href="#quick-comparison-agon-vs-toon" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quick Example
+        Quick Comparison: AGON vs TOON
       
     </span>
   </a>
@@ -490,22 +490,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-it-works" class="md-nav__link">
+  <a href="#quick-start" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How It Works
+        Quick Start
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="How It Works">
+    <nav class="md-nav" aria-label="Quick Start">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-agontext-row-based-encoding" class="md-nav__link">
+  <a href="#basic-usage" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. AGONText - Row-Based Encoding
+        Basic Usage
       
     </span>
   </a>
@@ -513,21 +513,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-agoncolumns-columnar-encoding" class="md-nav__link">
+  <a href="#format-outputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. AGONColumns - Columnar Encoding
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-agonstruct-template-based-encoding" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        3. AGONStruct - Template-Based Encoding
+        Format Outputs
       
     </span>
   </a>
@@ -551,13 +540,113 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#why-not-just-use-a-fixed-format" class="md-nav__link">
+  <a href="#use-cases" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Why Not Just Use a Fixed Format?
+        Use Cases
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Use Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#when-agon-helps-most" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When AGON Helps Most
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-agon-helps-least" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When AGON Helps Least
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#experimental-asking-llms-to-generate-agon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Experimental: Asking LLMs to Generate AGON
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Next Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Concepts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Reference
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#format-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Format Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benchmarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Benchmarks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -732,14 +821,14 @@
   
   
     <li class="md-nav__item">
-      <a href="formats/text/" class="md-nav__link">
+      <a href="formats/rows/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Text
+    Rows
   
 
     
@@ -864,7 +953,7 @@
 
 
 <h1 id="agon">AGON<a class="headerlink" href="#agon" title="Permanent link">&para;</a></h1>
-<p><strong>Adaptive Guarded Object Notation</strong> — Self-describing, token-efficient JSON encodings optimized for LLM prompts.</p>
+<p><strong>Adaptive Guarded Object Notation</strong> — Self-describing, token-efficient JSON encodings optimized for LLM prompts with one guarantee: <strong>never worse than compact JSON</strong>.</p>
 <h2 id="what-is-agon">What is AGON?<a class="headerlink" href="#what-is-agon" title="Permanent link">&para;</a></h2>
 <p>AGON is an adaptive encoding library for Python that automatically selects the most token-efficient format for your data—<strong>guaranteed to never be worse than compact JSON</strong>. It provides multiple specialized encoding formats that can reduce token usage by 30-60% compared to JSON, while maintaining perfect lossless round-trip conversion.</p>
 <h3 id="the-problem">The Problem<a class="headerlink" href="#the-problem" title="Permanent link">&para;</a></h3>
@@ -872,56 +961,136 @@
 <h3 id="agons-solution">AGON's Solution<a class="headerlink" href="#agons-solution" title="Permanent link">&para;</a></h3>
 <p>Adaptive encoding with safety guarantees:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">result</span> <span class="o">=</span> <span class="n">AGON</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1"># Auto tries: text, columns, struct</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1"># Auto tries: rows, columns, struct</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># Returns: whichever saves the most tokens</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Falls back: to compact JSON if none are better</span>
 </span></code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Rust-Powered Performance</p>
+<p>AGON's core encoding engine is built in <strong>Rust</strong> with <strong>PyO3 bindings</strong>, delivering:</p>
+<ul>
+<li><strong>Parallel format evaluation</strong> using rayon for auto mode</li>
+<li><strong>Native speed</strong> with Python convenience</li>
+</ul>
+<p>See <a href="benchmarks/#performance">Performance Benchmarks</a> for detailed metrics.</p>
+</div>
 <hr />
-<h2 id="quick-example">Quick Example<a class="headerlink" href="#quick-example" title="Permanent link">&para;</a></h2>
-<p>Here's AGON in action with a simple user list:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Python Code</label><label for="__tabbed_1_2">AGONText Output</label><label for="__tabbed_1_3">Token Comparison</label></div>
+<h2 id="quick-comparison-agon-vs-toon">Quick Comparison: AGON vs TOON<a class="headerlink" href="#quick-comparison-agon-vs-toon" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>TOON</th>
+<th>AGON</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Approach</strong></td>
+<td>Single unified format</td>
+<td>Multiple adaptive formats + JSON fallback</td>
+</tr>
+<tr>
+<td><strong>Risk</strong></td>
+<td>Can be worse than JSON on irregular data</td>
+<td><strong>Never worse than JSON</strong> (guaranteed)</td>
+</tr>
+<tr>
+<td><strong>Format Selection</strong></td>
+<td>Always applies TOON encoding</td>
+<td>Auto-selects best format or falls back to JSON</td>
+</tr>
+<tr>
+<td><strong>Best For</strong></td>
+<td>Uniform arrays, consistent pipelines</td>
+<td>Variable data shapes, risk-averse optimization</td>
+</tr>
+<tr>
+<td><strong>Philosophy</strong></td>
+<td>"One format for all JSON"</td>
+<td>"Best format for each data shape, or JSON"</td>
+</tr>
+</tbody>
+</table>
+<p>For uniform arrays, <code>AGONRows</code> produces nearly identical output to TOON (tabs vs commas as delimiters, achieving the same token count). For everything else, AGON's adaptive approach ensures you always get the best result.</p>
+<hr />
+<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
+<p>Install AGON via pip:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>pip<span class="w"> </span>install<span class="w"> </span>agon-python
+</span></code></pre></div>
+<p>Or using <a href="https://github.com/astral-sh/uv">uv</a> (recommended):</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>uv<span class="w"> </span>add<span class="w"> </span>agon-python
+</span></code></pre></div>
+<hr />
+<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
+<h3 id="basic-usage">Basic Usage<a class="headerlink" href="#basic-usage" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGON</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="c1"># Sample data - list of objects with repeated structure</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Alice&quot;</span><span class="p">,</span> <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;admin&quot;</span><span class="p">},</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Bob&quot;</span><span class="p">,</span> <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">},</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Charlie&quot;</span><span class="p">,</span> <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">},</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">]</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="c1"># Encode with auto-selection (tries rows/columns/struct, picks best or falls back to JSON)</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="n">result</span> <span class="o">=</span> <span class="n">AGON</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Selected format: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">format</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># → &quot;rows&quot;</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="c1"># Use directly in LLM prompts - no header needed</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="n">prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;Analyze this user data:</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="si">{</span><span class="n">result</span><span class="si">}</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="s2">What percentage are admins?&quot;&quot;&quot;</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="c1"># Verify lossless round-trip</span>
+</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="n">decoded</span> <span class="o">=</span> <span class="n">AGON</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="k">assert</span> <span class="n">decoded</span> <span class="o">==</span> <span class="n">data</span>  <span class="c1"># ✅ Perfect reconstruction</span>
+</span></code></pre></div>
+<h3 id="format-outputs">Format Outputs<a class="headerlink" href="#format-outputs" title="Permanent link">&para;</a></h3>
+<p>AGON provides <strong>three specialized formats</strong>, each optimized for different data shapes. Auto mode tries all formats in parallel and selects the best:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">AGONRows</label><label for="__tabbed_1_2">AGONColumns</label><label for="__tabbed_1_3">AGONStruct</label><label for="__tabbed_1_4">Token Comparison</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGON</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># Sample data - list of objects with repeated structure</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Alice&quot;</span><span class="p">,</span> <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;admin&quot;</span><span class="p">},</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Bob&quot;</span><span class="p">,</span> <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">},</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Charlie&quot;</span><span class="p">,</span> <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">},</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="p">]</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="c1"># Encode with auto-selection</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="n">result</span> <span class="o">=</span> <span class="n">AGON</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Selected format: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">format</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># → &quot;text&quot;</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="c1"># Use directly in LLM prompts</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="n">prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;Analyze this user data:</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="si">{</span><span class="n">result</span><span class="si">}</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="s2">What percentage are admins?&quot;&quot;&quot;</span>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="c1"># Verify lossless round-trip</span>
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="n">decoded</span> <span class="o">=</span> <span class="n">AGON</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="k">assert</span> <span class="n">decoded</span> <span class="o">==</span> <span class="n">data</span>  <span class="c1"># Perfect reconstruction</span>
+<p><strong>Best for:</strong> Uniform arrays of objects with consistent fields</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>[3]{id  name    role}
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>1   Alice   admin
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>2   Bob user
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>3   Charlie user
 </span></code></pre></div>
+<p><strong>Ideal for:</strong> User lists, transaction logs, simple metrics</p>
+<p><strong>Similar to:</strong> <a href="https://toonformat.dev">TOON format</a> (tabs instead of commas)</p>
 </div>
 <div class="tabbed-block">
-<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>[3]{id  name    role}
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>1   Alice   admin
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>2   Bob user
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>3   Charlie user
+<p><strong>Best for:</strong> Wide tables (many columns) or numeric-heavy data</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>users[3]
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>├ id: 1 2   3
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>├ name: Alice   Bob Charlie
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>└ role: admin   user    user
 </span></code></pre></div>
-<p>Clean, tab-delimited format with array length <code>[3]</code> and field headers <code>{id name role}</code>. No <code>@AGON</code> header needed when sending to LLMs—only required for decoding.</p>
+<p><strong>Ideal for:</strong> Financial data (20+ fields), analytics tables</p>
 </div>
 <div class="tabbed-block">
+<p><strong>Best for:</strong> Repeated nested patterns like <code>{fmt, raw}</code> or <code>{value, timestamp}</code></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>@FR: fmt, raw
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>price: FR(&quot;$100.00&quot;, 100.0)
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>change: FR(&quot;+5.00&quot;, 5.0)
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>volume: FR(&quot;1.2M&quot;, 1200000)
+</span></code></pre></div>
+<p><strong>Ideal for:</strong> Market data, API responses with nested structures</p>
+<p><strong>Similar to:</strong> <a href="https://tron-format.github.io/">TRON format</a> (abbreviated struct names)</p>
+</div>
+<div class="tabbed-block">
+<p>Token counts for the user data example above:</p>
 <table>
 <thead>
 <tr>
 <th>Format</th>
 <th>Tokens</th>
-<th>Savings</th>
+<th>Savings vs Pretty</th>
+<th>Savings vs Compact</th>
 </tr>
 </thead>
 <tbody>
@@ -929,67 +1098,43 @@
 <td><strong>Pretty JSON</strong></td>
 <td>62</td>
 <td>baseline</td>
+<td>-68%</td>
 </tr>
 <tr>
 <td><strong>Compact JSON</strong></td>
 <td>37</td>
 <td>+40%</td>
+<td>baseline</td>
 </tr>
 <tr>
-<td><strong>AGON Text</strong></td>
+<td><strong>AGON Rows</strong></td>
 <td><strong>26</strong></td>
 <td><strong>+58%</strong></td>
+<td><strong>+30%</strong> ✅</td>
+</tr>
+<tr>
+<td><strong>AGON Columns</strong></td>
+<td>28</td>
+<td>+55%</td>
+<td>+24%</td>
+</tr>
+<tr>
+<td><strong>AGON Struct</strong></td>
+<td>35</td>
+<td>+44%</td>
+<td>+5%</td>
 </tr>
 </tbody>
 </table>
-<p>AGON's adaptive selection identified that this uniform array is ideal for AGONText format, achieving <strong>58% token savings</strong> compared to pretty JSON, and <strong>30% savings</strong> even against compact JSON.</p>
+<p>Auto mode selected <strong>AGONRows</strong> (best savings, exceeds 10% threshold vs compact JSON)</p>
 </div>
 </div>
 </div>
-<hr />
-<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
-<p>Install AGON via pip:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>pip<span class="w"> </span>install<span class="w"> </span>agon-python
-</span></code></pre></div>
-<p>Or using <a href="https://github.com/astral-sh/uv">uv</a> (recommended):</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>uv<span class="w"> </span>add<span class="w"> </span>agon-python
-</span></code></pre></div>
-<hr />
-<h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
-<p>AGON provides <strong>three specialized formats</strong>, each optimized for different data shapes:</p>
-<h3 id="1-agontext-row-based-encoding">1. AGONText - Row-Based Encoding<a class="headerlink" href="#1-agontext-row-based-encoding" title="Permanent link">&para;</a></h3>
-<p>Best for <strong>uniform arrays</strong> of objects with consistent fields.</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>[3]{id  name    role}
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>1   Alice   admin
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>2   Bob user
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>3   Charlie user
-</span></code></pre></div>
-<p><strong>Ideal for:</strong> User lists, transaction logs, simple metrics
-<strong>Token savings:</strong> 40-60% vs pretty JSON</p>
-<h3 id="2-agoncolumns-columnar-encoding">2. AGONColumns - Columnar Encoding<a class="headerlink" href="#2-agoncolumns-columnar-encoding" title="Permanent link">&para;</a></h3>
-<p>Best for <strong>wide tables</strong> (many columns) or numeric-heavy data.</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>users[3]
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>├ id: 1 2   3
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>├ name: Alice   Bob Charlie
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>└ role: admin   user    user
-</span></code></pre></div>
-<p><strong>Ideal for:</strong> Financial data (20+ fields), analytics tables
-<strong>Token savings:</strong> 50-70% vs pretty JSON</p>
-<h3 id="3-agonstruct-template-based-encoding">3. AGONStruct - Template-Based Encoding<a class="headerlink" href="#3-agonstruct-template-based-encoding" title="Permanent link">&para;</a></h3>
-<p>Best for <strong>repeated nested patterns</strong> like <code>{fmt, raw}</code> or <code>{value, timestamp}</code>.</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>@FR: fmt, raw
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>price: FR(&quot;$100.00&quot;, 100.0)
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>change: FR(&quot;+5.00&quot;, 5.0)
-</span></code></pre></div>
-<p><strong>Ideal for:</strong> Market data, API responses with nested structures
-<strong>Token savings:</strong> 30-50% vs pretty JSON</p>
 <hr />
 <h3 id="adaptive-auto-mode">Adaptive Auto Mode<a class="headerlink" href="#adaptive-auto-mode" title="Permanent link">&para;</a></h3>
-<p>The <code>format="auto"</code> mode tries all three formats and selects the winner:</p>
-<p><code>mermaid
-graph TD
-    A[Encode data with auto mode] --&gt; B[Try AGONText]
+<p>The <code>format="auto"</code> mode tries all three formats in parallel and selects the winner:</p>
+<pre class="mermaid"><code>graph TD
+    A[Encode data with auto mode] --&gt; B[Try AGONRows]
     A --&gt; C[Try AGONColumns]
     A --&gt; D[Try AGONStruct]
     A --&gt; E[Compact JSON baseline]
@@ -1001,36 +1146,81 @@ graph TD
     G --&gt;|Yes| H[Return best format]
     G --&gt;|No| I[Return JSON]
     H --&gt; J[Token-efficient AGON]
-    I --&gt; K[Safe JSON fallback]</code></p>
+    I --&gt; K[Safe JSON fallback]</code></pre>
+<p><strong>The guarantee:</strong> Auto mode <em>never</em> returns a format with more tokens than compact JSON. If all specialized formats are worse or marginally better, it returns JSON.</p>
 <hr />
-<h2 id="why-not-just-use-a-fixed-format">Why Not Just Use a Fixed Format?<a class="headerlink" href="#why-not-just-use-a-fixed-format" title="Permanent link">&para;</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">The Fixed-Format Problem</p>
-<p>Fixed-format encoders like TOON can be worse than JSON on irregular data:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># Fixed format: Always applies encoding</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="n">toon_result</span> <span class="o">=</span> <span class="n">TOON</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">complex_data</span><span class="p">)</span>  <span class="c1"># Might be worse than JSON!</span>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># AGON: Adaptive with safety guarantee</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="n">agon_result</span> <span class="o">=</span> <span class="n">AGON</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">complex_data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>  <span class="c1"># Never worse than JSON</span>
-</span></code></pre></div>
-<p><strong>AGON's auto mode</strong> guarantees you'll never regret using it. If specialized formats don't save enough tokens, it returns compact JSON</p>
-</div>
-<div class="admonition success">
-<p class="admonition-title">AGON vs TOON</p>
-<p>AGON and TOON are complementary:</p>
+<h2 id="use-cases">Use Cases<a class="headerlink" href="#use-cases" title="Permanent link">&para;</a></h2>
+<p>AGON excels in scenarios where data structure varies and intelligent format selection provides value:</p>
+<h3 id="when-agon-helps-most">When AGON Helps Most<a class="headerlink" href="#when-agon-helps-most" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>TOON</strong>: Single unified format, predictable encoding, great for uniform arrays</li>
-<li><strong>AGON</strong>: Multiple adaptive formats + JSON fallback, best format per data shape</li>
+<li><strong>Variable data pipelines</strong>: Data that changes shape (sometimes uniform arrays, sometimes nested objects) where auto-mode selects the optimal format</li>
+<li><strong>Uniform arrays</strong>: Lists of consistent objects (AGONRows: up to 58% savings vs pretty JSON)</li>
+<li><strong>Wide tables</strong>: Financial records, analytics data with 10+ columns (AGONColumns: up to 70% savings)</li>
+<li><strong>Repeated nested patterns</strong>: Market data with <code>{fmt, raw}</code> structures (AGONStruct: up to 49% savings)</li>
+<li><strong>Cost-sensitive applications</strong>: Where every token counts and honest fallback prevents wasted overhead</li>
+<li><strong>Data projection workflows</strong>: Use cases where filtering fields before encoding is important (<code>AGON.project_data</code>)</li>
 </ul>
-<p>For uniform arrays, <code>AGONText</code> produces identical output to TOON. For everything else, AGON's adaptive approach ensures you always get the best result.</p>
+<h3 id="when-agon-helps-least">When AGON Helps Least<a class="headerlink" href="#when-agon-helps-least" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Tiny payloads</strong>: &lt;50 tokens where encoding overhead exceeds savings</li>
+<li><strong>Highly irregular objects</strong>: No repetition or consistent structure (auto-mode falls back to JSON)</li>
+<li><strong>Single-use data</strong>: Unpredictable, one-off structures with no patterns</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">When in doubt, use <code>format='auto'</code></p>
+<p>The safety guarantee means you can use auto mode everywhere. If specialized formats don't help, you'll get compact JSON—no harm done.</p>
 </div>
+<hr />
+<h2 id="experimental-asking-llms-to-generate-agon">Experimental: Asking LLMs to Generate AGON<a class="headerlink" href="#experimental-asking-llms-to-generate-agon" title="Permanent link">&para;</a></h2>
+<p><strong>⚠️ Note:</strong> LLMs have NOT been trained on AGON format, so accuracy cannot be guaranteed. This is an experimental feature. For production use, prefer <strong>sending AGON to LLMs</strong> (reliable) over <strong>asking LLMs to generate AGON</strong> (experimental, requires validation).</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGON</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Alice&quot;</span><span class="p">,</span> <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;admin&quot;</span><span class="p">},</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Bob&quot;</span><span class="p">,</span> <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">},</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="p">]</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="n">result</span> <span class="o">=</span> <span class="n">AGON</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="c1"># To ask an LLM to respond in AGON format, provide both:</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="c1"># 1. Generation instructions via result.hint()</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="c1"># 2. An example with header via result.with_header()</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="n">prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;Analyze this user data and return enriched data in AGON format.</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="s2">Instructions: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">hint</span><span class="p">()</span><span class="si">}</span>
+</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>
+</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="s2">Example output:</span>
+</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">with_header</span><span class="p">()</span><span class="si">}</span>
+</span><span id="__span-7-19"><a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>
+</span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="s2">Task: Add an is_admin boolean field and return in the same format.&quot;&quot;&quot;</span>
+</span><span id="__span-7-21"><a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a>
+</span><span id="__span-7-22"><a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a><span class="c1"># Decode LLM response using header to auto-detect format</span>
+</span><span id="__span-7-23"><a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a><span class="c1"># parsed = AGON.decode(llm_response)</span>
+</span></code></pre></div>
+<p>See the <a href="api/#hint">API Reference</a> for details on <code>hint()</code> and <code>with_header()</code> methods.</p>
+<hr />
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<h3 id="core-concepts"><a href="concepts/">Core Concepts</a><a class="headerlink" href="#core-concepts" title="Permanent link">&para;</a></h3>
+<p>Understand AGON's adaptive approach, format selection, and design principles</p>
+<h3 id="api-reference"><a href="api/">API Reference</a><a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h3>
+<p>Complete documentation of all methods, parameters, and classes</p>
+<h3 id="format-documentation"><a href="formats/rows/">Format Documentation</a><a class="headerlink" href="#format-documentation" title="Permanent link">&para;</a></h3>
+<p>Detailed guides for each specialized format:</p>
+<ul>
+<li><a href="formats/rows/">AGONRows Format</a> - Row-based tabular encoding</li>
+<li><a href="formats/columns/">AGONColumns Format</a> - Columnar transpose encoding</li>
+<li><a href="formats/struct/">AGONStruct Format</a> - Template-based encoding</li>
+<li><a href="formats/json/">JSON Fallback</a> - When and why AGON returns JSON</li>
+</ul>
+<h3 id="benchmarks"><a href="benchmarks/">Benchmarks</a><a class="headerlink" href="#benchmarks" title="Permanent link">&para;</a></h3>
+<p>Real-world token savings and performance metrics across 7 datasets</p>
 <hr />
 <h2 id="community-contributing">Community &amp; Contributing<a class="headerlink" href="#community-contributing" title="Permanent link">&para;</a></h2>
 <p>AGON is open source and welcomes contributions!</p>
 <ul>
-<li><a href="https://github.com/Verdenroz/agon-python/issues">Report issues</a></li>
-<li><a href="https://github.com/Verdenroz/agon-python/issues/new">Request features</a></li>
-<li><a href="https://github.com/Verdenroz/agon-python/blob/master/CONTRIBUTING.md">Contribute</a></li>
+<li><strong>Issues</strong>: <a href="https://github.com/Verdenroz/agon-python/issues">Report bugs or request features</a></li>
+<li><strong>Contributing</strong>: See <a href="https://github.com/Verdenroz/agon-python#development">development guide</a></li>
+<li><strong>Related projects</strong>: <a href="https://toonformat.dev">TOON</a> | <a href="https://tron-format.github.io/">TRON</a></li>
 </ul>
 <hr />
 <h2 id="license">License<a class="headerlink" href="#license" title="Permanent link">&para;</a></h2>

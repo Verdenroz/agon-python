@@ -537,14 +537,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../text/" class="md-nav__link">
+      <a href="../rows/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Text
+    Rows
   
 
     
@@ -892,10 +892,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#agontext-format" class="md-nav__link">
+  <a href="#agonrows-format" class="md-nav__link">
     <span class="md-ellipsis">
       
-        AGONText Format
+        AGONRows Format
       
     </span>
   </a>
@@ -1068,7 +1068,7 @@
 <td>+41.4%</td>
 </tr>
 <tr>
-<td>AGONText</td>
+<td>AGONRows</td>
 <td>90</td>
 <td>+29.7%</td>
 </tr>
@@ -1154,7 +1154,7 @@
 <li><strong>Minimum fields:</strong> 2 (default, configurable)</li>
 <li><strong>Primitive values only:</strong> Nested objects/arrays don't create structs</li>
 </ul>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon.formats</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGONStruct</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGONStruct</span>
 </span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
 </span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="c1"># Detect patterns with 5+ occurrences (more aggressive)</span>
 </span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">encoded</span> <span class="o">=</span> <span class="n">AGONStruct</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">min_occurrences</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
@@ -1342,7 +1342,7 @@
 <td>+41.4%</td>
 </tr>
 <tr>
-<td>AGONText</td>
+<td>AGONRows</td>
 <td>197</td>
 <td>+30.9%</td>
 </tr>
@@ -1376,7 +1376,7 @@
 <li><strong>Few fields</strong> (1 field objects) → No savings from template</li>
 <li><strong>Irregular nested structures</strong> → Can't identify consistent pattern</li>
 <li><strong>Deeply nested objects</strong> → Struct only works for shallow primitives</li>
-<li><strong>Array-heavy data</strong> → AGONText or AGONColumns better</li>
+<li><strong>Array-heavy data</strong> → AGONRows or AGONColumns better</li>
 </ul>
 <p><strong>Example where template overhead hurts:</strong></p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># Only 2 instances - template not worth it</span>
@@ -1396,7 +1396,7 @@
 <hr />
 <h2 id="direct-usage">Direct Usage<a class="headerlink" href="#direct-usage" title="Permanent link">&para;</a></h2>
 <p>For advanced use cases, use AGONStruct encoder directly:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon.formats</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGONStruct</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGONStruct</span>
 </span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>
 </span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="c1"># Encode with default options (min_occurrences=3, min_fields=2)</span>
 </span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="n">encoded</span> <span class="o">=</span> <span class="n">AGONStruct</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -1554,7 +1554,7 @@
 <p><strong>Observation:</strong> More fields = greater per-instance savings. However, AGONStruct is optimized for <strong>small repeated patterns</strong> (2-4 fields). For 10+ field objects repeated many times, AGONColumns often wins.</p>
 <h2 id="comparison-struct-vs-text">Comparison: Struct vs Text<a class="headerlink" href="#comparison-struct-vs-text" title="Permanent link">&para;</a></h2>
 <p>For the same market data with 5 <code>{fmt, raw}</code> instances:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">AGONText (No Template)</label><label for="__tabbed_3_2">AGONStruct (Template)</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">AGONRows (No Template)</label><label for="__tabbed_3_2">AGONStruct (Template)</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="language-text highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>price:
@@ -1588,7 +1588,7 @@
 </div>
 </div>
 </div>
-<p><strong>Key difference:</strong> AGONText repeats field names in every nested object. AGONStruct defines template once, then instances reference it by name with positional values.</p>
+<p><strong>Key difference:</strong> AGONRows repeats field names in every nested object. AGONStruct defines template once, then instances reference it by name with positional values.</p>
 <hr />
 <h2 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">&para;</a></h2>
 <details class="question">
@@ -1613,7 +1613,7 @@
 <details class="question">
 <summary>Can I customize minimum occurrences threshold?</summary>
 <p>Yes! Use the encoder directly:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon.formats</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGONStruct</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGONStruct</span>
 </span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>
 </span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="c1"># Lower threshold (detect patterns with 2+ occurrences)</span>
 </span><span id="__span-24-4"><a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="n">encoded</span> <span class="o">=</span> <span class="n">AGONStruct</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">min_occurrences</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
@@ -1659,7 +1659,7 @@
 </details>
 <hr />
 <h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
-<h3 id="agontext-format"><a href="../text/">AGONText Format</a><a class="headerlink" href="#agontext-format" title="Permanent link">&para;</a></h3>
+<h3 id="agonrows-format"><a href="../rows/">AGONRows Format</a><a class="headerlink" href="#agonrows-format" title="Permanent link">&para;</a></h3>
 <p>Learn about row-based encoding for flat arrays</p>
 <h3 id="agoncolumns-format"><a href="../columns/">AGONColumns Format</a><a class="headerlink" href="#agoncolumns-format" title="Permanent link">&para;</a></h3>
 <p>Learn about columnar encoding for wide tables</p>

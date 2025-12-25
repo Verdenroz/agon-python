@@ -11,7 +11,7 @@
       
       
       
-        <link rel="prev" href="../text/">
+        <link rel="prev" href="../rows/">
       
       
         <link rel="next" href="../struct/">
@@ -537,14 +537,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../text/" class="md-nav__link">
+      <a href="../rows/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Text
+    Rows
   
 
     
@@ -869,10 +869,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#agontext-format" class="md-nav__link">
+  <a href="#agonrows-format" class="md-nav__link">
     <span class="md-ellipsis">
       
-        AGONText Format
+        AGONRows Format
       
     </span>
   </a>
@@ -1093,7 +1093,7 @@
 <td>+38.5%</td>
 </tr>
 <tr>
-<td>AGONText</td>
+<td>AGONRows</td>
 <td>137</td>
 <td>+55.7%</td>
 </tr>
@@ -1130,7 +1130,7 @@
 <li><code>└</code> (U+2514) - Last branch: final field</li>
 </ul>
 <p><strong>ASCII mode:</strong></p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon.formats</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGONColumns</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGONColumns</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="c1"># Use ASCII tree characters for compatibility</span>
 </span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">encoded</span> <span class="o">=</span> <span class="n">AGONColumns</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">use_ascii</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1143,7 +1143,7 @@
 <h3 id="delimiters">Delimiters<a class="headerlink" href="#delimiters" title="Permanent link">&para;</a></h3>
 <p><strong>Default:</strong> Tab character (<code>\t</code>)</p>
 <p><strong>Custom delimiter:</strong></p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon.formats</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGONColumns</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGONColumns</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="c1"># Use comma-space delimiter</span>
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">encoded</span> <span class="o">=</span> <span class="n">AGONColumns</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;, &quot;</span><span class="p">)</span>
@@ -1315,9 +1315,9 @@
 <p>| Format | Tokens | Savings |
 |--------|--------|---------| | Pretty JSON | 381 | baseline |
 | Compact JSON | 231 | +39.4% |
-| AGONText | 171 | +55.1% |
+| AGONRows | 171 | +55.1% |
 | <strong>AGONColumns</strong> | <strong>186</strong> | <strong>+51.2%</strong> |</p>
-<p><strong>Trade-off:</strong> AGONText wins for this example (fewer fields), but as field count grows beyond 10, AGONColumns pulls ahead due to type clustering.</p>
+<p><strong>Trade-off:</strong> AGONRows wins for this example (fewer fields), but as field count grows beyond 10, AGONColumns pulls ahead due to type clustering.</p>
 </div>
 </div>
 </div>
@@ -1335,7 +1335,7 @@
 <hr />
 <h2 id="when-agoncolumns-loses">When AGONColumns Loses<a class="headerlink" href="#when-agoncolumns-loses" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Few fields</strong> (2-5 fields) → AGONText wins with simpler row-based format</li>
+<li><strong>Few fields</strong> (2-5 fields) → AGONRows wins with simpler row-based format</li>
 <li><strong>Highly irregular structure</strong> (fields vary between records) → JSON fallback</li>
 <li><strong>Deeply nested objects</strong> with no arrays → AGONStruct or JSON</li>
 <li><strong>Heterogeneous data</strong> per column (mixed types) → Row-based better</li>
@@ -1355,7 +1355,7 @@
 <hr />
 <h2 id="direct-usage">Direct Usage<a class="headerlink" href="#direct-usage" title="Permanent link">&para;</a></h2>
 <p>For advanced use cases, use AGONColumns encoder directly:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon.formats</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGONColumns</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGONColumns</span>
 </span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>
 </span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="c1"># Encode with default options</span>
 </span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="n">encoded</span> <span class="o">=</span> <span class="n">AGONColumns</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -1442,7 +1442,7 @@
 <hr />
 <h2 id="comparison-columns-vs-text">Comparison: Columns vs Text<a class="headerlink" href="#comparison-columns-vs-text" title="Permanent link">&para;</a></h2>
 <p>For the same employee dataset with 12 fields:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">AGONText (Row-Based)</label><label for="__tabbed_3_2">AGONColumns (Columnar)</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">AGONRows (Row-Based)</label><label for="__tabbed_3_2">AGONColumns (Columnar)</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="language-text highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>[3]{id  name    email   age city    state   zip phone   dept    title   salary  start_date}
@@ -1473,7 +1473,7 @@
 </div>
 <p><strong>Decision factors:</strong></p>
 <ul>
-<li><strong>2-10 fields:</strong> Use AGONText (simpler, less overhead)</li>
+<li><strong>2-10 fields:</strong> Use AGONRows (simpler, less overhead)</li>
 <li><strong>10-15 fields:</strong> Borderline—auto mode chooses based on data</li>
 <li><strong>15+ fields:</strong> Use AGONColumns (type clustering advantage wins)</li>
 </ul>
@@ -1497,7 +1497,7 @@
 <details class="question">
 <summary>Can I customize tree characters?</summary>
 <p>Yes! Use ASCII mode for compatibility:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon.formats</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGONColumns</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGONColumns</span>
 </span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="n">encoded</span> <span class="o">=</span> <span class="n">AGONColumns</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">use_ascii</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="c1"># Uses | and ` instead of ├ and └</span>
 </span></code></pre></div>
@@ -1530,7 +1530,7 @@
 </details>
 <hr />
 <h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
-<h3 id="agontext-format"><a href="../text/">AGONText Format</a><a class="headerlink" href="#agontext-format" title="Permanent link">&para;</a></h3>
+<h3 id="agonrows-format"><a href="../rows/">AGONRows Format</a><a class="headerlink" href="#agonrows-format" title="Permanent link">&para;</a></h3>
 <p>Learn about row-based encoding for narrow tables</p>
 <h3 id="agonstruct-format"><a href="../struct/">AGONStruct Format</a><a class="headerlink" href="#agonstruct-format" title="Permanent link">&para;</a></h3>
 <p>Learn about template-based encoding</p>

@@ -25,7 +25,7 @@
     
     
       
-        <title>Text - AGON</title>
+        <title>Rows - AGON</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#agontext-format" class="md-skip">
+        <a href="#agonrows-format" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Text
+              Rows
             
           </span>
         </div>
@@ -553,7 +553,7 @@
   <span class="md-ellipsis">
     
   
-    Text
+    Rows
   
 
     
@@ -571,7 +571,7 @@
   <span class="md-ellipsis">
     
   
-    Text
+    Rows
   
 
     
@@ -741,10 +741,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#when-agontext-wins" class="md-nav__link">
+  <a href="#when-agonrows-wins" class="md-nav__link">
     <span class="md-ellipsis">
       
-        When AGONText Wins
+        When AGONRows Wins
       
     </span>
   </a>
@@ -752,10 +752,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#when-agontext-loses" class="md-nav__link">
+  <a href="#when-agonrows-loses" class="md-nav__link">
     <span class="md-ellipsis">
       
-        When AGONText Loses
+        When AGONRows Loses
       
     </span>
   </a>
@@ -986,11 +986,11 @@
   
 
 
-<h1 id="agontext-format">AGONText Format<a class="headerlink" href="#agontext-format" title="Permanent link">&para;</a></h1>
+<h1 id="agonrows-format">AGONRows Format<a class="headerlink" href="#agonrows-format" title="Permanent link">&para;</a></h1>
 <p>Row-based tabular encoding for uniform arrays—AGON's most commonly selected format.</p>
 <hr />
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>AGONText is a <strong>row-based encoding format</strong> optimized for uniform arrays of objects with consistent field structure. It's similar to TOON's approach and produces identical output for uniform arrays.</p>
+<p>AGONRows is a <strong>row-based encoding format</strong> optimized for uniform arrays of objects with consistent field structure. It's similar to TOON's approach and produces nearly identical output for uniform arrays (tabs vs commas as delimiters).</p>
 <p><strong>Best for:</strong></p>
 <ul>
 <li>User lists, transaction logs, simple metrics</li>
@@ -1001,7 +1001,7 @@
 <hr />
 <h2 id="basic-example">Basic Example<a class="headerlink" href="#basic-example" title="Permanent link">&para;</a></h2>
 <p>Let's encode a simple user list:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Input (JSON)</label><label for="__tabbed_1_2">Output (AGONText)</label><label for="__tabbed_1_3">Token Breakdown</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Input (JSON)</label><label for="__tabbed_1_2">Output (AGONRows)</label><label for="__tabbed_1_3">Token Breakdown</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">[</span>
@@ -1086,15 +1086,15 @@
 <h3 id="delimiters">Delimiters<a class="headerlink" href="#delimiters" title="Permanent link">&para;</a></h3>
 <p><strong>Default:</strong> Tab character (<code>\t</code>)</p>
 <p><strong>Custom delimiter:</strong></p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon.formats</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGONText</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGONRows</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="c1"># Use pipe delimiter instead of tab</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">encoded</span> <span class="o">=</span> <span class="n">AGONText</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">encoded</span> <span class="o">=</span> <span class="n">AGONRows</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 <hr />
 <h2 id="encoding-rules">Encoding Rules<a class="headerlink" href="#encoding-rules" title="Permanent link">&para;</a></h2>
 <h3 id="primitives">Primitives<a class="headerlink" href="#primitives" title="Permanent link">&para;</a></h3>
-<p>AGONText infers types from content—no type markers needed:</p>
+<p>AGONRows infers types from content—no type markers needed:</p>
 <table>
 <thead>
 <tr>
@@ -1171,7 +1171,7 @@
 <hr />
 <h2 id="complete-example">Complete Example<a class="headerlink" href="#complete-example" title="Permanent link">&para;</a></h2>
 <p>Real-world data from <code>toon.json</code>:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Input (JSON)</label><label for="__tabbed_2_2">Output (AGONText)</label><label for="__tabbed_2_3">Token Comparison</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Input (JSON)</label><label for="__tabbed_2_2">Output (AGONRows)</label><label for="__tabbed_2_3">Token Comparison</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="language-json highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="p">{</span>
@@ -1243,7 +1243,7 @@
 <td>+39.3%</td>
 </tr>
 <tr>
-<td><strong>AGONText</strong></td>
+<td><strong>AGONRows</strong></td>
 <td><strong>96</strong></td>
 <td><strong>+58.1%</strong></td>
 </tr>
@@ -1254,7 +1254,7 @@
 </div>
 </div>
 <hr />
-<h2 id="when-agontext-wins">When AGONText Wins<a class="headerlink" href="#when-agontext-wins" title="Permanent link">&para;</a></h2>
+<h2 id="when-agonrows-wins">When AGONRows Wins<a class="headerlink" href="#when-agonrows-wins" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Uniform arrays</strong> with 3+ records having identical field structure</li>
 <li><strong>Consistent field types</strong> (all records have same fields with same types)</li>
@@ -1266,7 +1266,7 @@
 <li><strong>Flat CSV-like data</strong> being sent to LLMs</li>
 </ul>
 <hr />
-<h2 id="when-agontext-loses">When AGONText Loses<a class="headerlink" href="#when-agontext-loses" title="Permanent link">&para;</a></h2>
+<h2 id="when-agonrows-loses">When AGONRows Loses<a class="headerlink" href="#when-agonrows-loses" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Wide tables</strong> (10+ fields) → AGONColumns wins (type clustering)</li>
 <li><strong>Irregular structure</strong> (fields vary between records) → JSON fallback</li>
@@ -1291,24 +1291,24 @@
 </span></code></pre></div>
 <hr />
 <h2 id="direct-usage">Direct Usage<a class="headerlink" href="#direct-usage" title="Permanent link">&para;</a></h2>
-<p>For advanced use cases, use AGONText encoder directly:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon.formats</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGONText</span>
+<p>For advanced use cases, use AGONRows encoder directly:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGONRows</span>
 </span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>
 </span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="c1"># Encode with default options</span>
-</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="n">encoded</span> <span class="o">=</span> <span class="n">AGONText</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="n">encoded</span> <span class="o">=</span> <span class="n">AGONRows</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 </span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>
 </span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="c1"># Custom delimiter</span>
-</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="n">encoded</span> <span class="o">=</span> <span class="n">AGONText</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="n">encoded</span> <span class="o">=</span> <span class="n">AGONRows</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
 </span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>
 </span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="c1"># Without header (for LLM prompts)</span>
-</span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="n">encoded</span> <span class="o">=</span> <span class="n">AGONText</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">include_header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="n">encoded</span> <span class="o">=</span> <span class="n">AGONRows</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">include_header</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span><span id="__span-14-11"><a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>
 </span><span id="__span-14-12"><a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="c1"># With header (for decoding)</span>
-</span><span id="__span-14-13"><a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="n">encoded_with_header</span> <span class="o">=</span> <span class="n">AGONText</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">include_header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="__span-14-14"><a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a><span class="c1"># → @AGON text\n\n[3]{id...}</span>
+</span><span id="__span-14-13"><a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="n">encoded_with_header</span> <span class="o">=</span> <span class="n">AGONRows</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">include_header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-14-14"><a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a><span class="c1"># → @AGON rows\n\n[3]{id...}</span>
 </span><span id="__span-14-15"><a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a>
 </span><span id="__span-14-16"><a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a><span class="c1"># Decode</span>
-</span><span id="__span-14-17"><a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a><span class="n">decoded</span> <span class="o">=</span> <span class="n">AGONText</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoded</span><span class="p">)</span>
+</span><span id="__span-14-17"><a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a><span class="n">decoded</span> <span class="o">=</span> <span class="n">AGONRows</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoded</span><span class="p">)</span>
 </span><span id="__span-14-18"><a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a><span class="k">assert</span> <span class="n">decoded</span> <span class="o">==</span> <span class="n">data</span>  <span class="c1"># Lossless</span>
 </span></code></pre></div>
 <hr />
@@ -1317,7 +1317,7 @@
 <summary>Empty array</summary>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
 </span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>
-</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="n">result</span> <span class="o">=</span> <span class="n">AGON</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">)</span>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="n">result</span> <span class="o">=</span> <span class="n">AGON</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;rows&quot;</span><span class="p">)</span>
 </span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="c1"># → [0]{}</span>
 </span></code></pre></div>
 </details>
@@ -1325,7 +1325,7 @@
 <summary>Single item array</summary>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="n">data</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Alice&quot;</span><span class="p">}]</span>
 </span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>
-</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="n">result</span> <span class="o">=</span> <span class="n">AGON</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">)</span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="n">result</span> <span class="o">=</span> <span class="n">AGON</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;rows&quot;</span><span class="p">)</span>
 </span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="c1"># → [1]{id  name}</span>
 </span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="c1">#   1   Alice</span>
 </span></code></pre></div>
@@ -1334,7 +1334,7 @@
 <summary>All null values</summary>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="n">data</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}]</span>
 </span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>
-</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="n">result</span> <span class="o">=</span> <span class="n">AGON</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">)</span>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="n">result</span> <span class="o">=</span> <span class="n">AGON</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;rows&quot;</span><span class="p">)</span>
 </span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="c1"># → [1]{a   b}</span>
 </span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="c1">#</span>
 </span></code></pre></div>
@@ -1344,7 +1344,7 @@
 <summary>Special characters in values</summary>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="n">data</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Alice</span><span class="se">\t</span><span class="s2">Bob&quot;</span><span class="p">,</span> <span class="s2">&quot;quote&quot;</span><span class="p">:</span> <span class="s2">&quot;He said </span><span class="se">\&quot;</span><span class="s2">hi</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">}]</span>
 </span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>
-</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="n">result</span> <span class="o">=</span> <span class="n">AGON</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">)</span>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="n">result</span> <span class="o">=</span> <span class="n">AGON</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;rows&quot;</span><span class="p">)</span>
 </span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="c1"># → [1]{name    quote}</span>
 </span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="c1">#   &quot;Alice\tBob&quot;    &quot;He said \&quot;hi\&quot;&quot;</span>
 </span></code></pre></div>
@@ -1352,8 +1352,8 @@
 </details>
 <hr />
 <h2 id="comparison-with-toon">Comparison with TOON<a class="headerlink" href="#comparison-with-toon" title="Permanent link">&para;</a></h2>
-<p>For uniform arrays, AGONText and TOON produce <strong>near identical output</strong>:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">JSON</label><label for="__tabbed_3_2">TOON</label><label for="__tabbed_3_3">AGONText</label></div>
+<p>For uniform arrays, AGONRows and TOON produce <strong>near identical output</strong>:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">JSON</label><label for="__tabbed_3_2">TOON</label><label for="__tabbed_3_3">AGONRows</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="language-json highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="p">[</span>
@@ -1380,7 +1380,7 @@
 </div>
 </div>
 <p>Both achieve the same token savings vs JSON.</p>
-<p><strong>TOON and AGONText are near identical! The only difference is AGONText uses the <code>\t</code> delimiter.</strong></p>
+<p><strong>TOON and AGONRows are nearly identical!</strong> The only difference is that AGONRows uses tabs (<code>\t</code>) while TOON uses commas (<code>,</code>) as delimiters.</p>
 <hr />
 <h2 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">&para;</a></h2>
 <details class="question">
@@ -1400,13 +1400,13 @@
 </details>
 <details class="question">
 <summary>Can I customize the delimiter?</summary>
-<p>Yes! Use AGONText encoder directly:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon.formats</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGONText</span>
-</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="n">encoded</span> <span class="o">=</span> <span class="n">AGONText</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+<p>Yes! Use AGONRows encoder directly:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agon</span><span class="w"> </span><span class="kn">import</span> <span class="n">AGONRows</span>
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="n">encoded</span> <span class="o">=</span> <span class="n">AGONRows</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 </details>
 <details class="question">
-<summary>Does AGONText handle nested objects?</summary>
+<summary>Does AGONRows handle nested objects?</summary>
 <p>Yes, with indentation:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Alice&quot;</span><span class="p">,</span> <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">28</span><span class="p">}}</span>
 </span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>
@@ -1417,7 +1417,7 @@
 </span></code></pre></div>
 </details>
 <details class="question">
-<summary>Is AGONText the same as TOON?</summary>
+<summary>Is AGONRows the same as TOON?</summary>
 <p><strong>For uniform arrays:</strong> Yes, near identical output.</p>
 <p><strong>Overall:</strong> AGON includes safety features (auto mode, JSON fallback) that TOON doesn't have.</p>
 </details>
@@ -1428,7 +1428,7 @@
 <h3 id="agonstruct-format"><a href="../struct/">AGONStruct Format</a><a class="headerlink" href="#agonstruct-format" title="Permanent link">&para;</a></h3>
 <p>Learn about template-based encoding</p>
 <h3 id="benchmarks"><a href="../../benchmarks/">Benchmarks</a><a class="headerlink" href="#benchmarks" title="Permanent link">&para;</a></h3>
-<p>See AGONText performance on real datasets</p>
+<p>See AGONRows performance on real datasets</p>
 <h3 id="api-reference"><a href="../../api/">API Reference</a><a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h3>
 <p>Complete API documentation</p>
 

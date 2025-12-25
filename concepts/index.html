@@ -549,10 +549,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#agontext" class="md-nav__link">
+  <a href="#agonrows" class="md-nav__link">
     <span class="md-ellipsis">
       
-        AGONText
+        AGONRows
       
     </span>
   </a>
@@ -643,10 +643,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#when-they-produce-identical-output" class="md-nav__link">
+  <a href="#when-they-produce-nearly-identical-output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        When They Produce Identical Output
+        When They Produce Nearly Identical Output
       
     </span>
   </a>
@@ -715,10 +715,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#agontext-format" class="md-nav__link">
+  <a href="#agonrows-format" class="md-nav__link">
     <span class="md-ellipsis">
       
-        AGONText Format
+        AGONRows Format
       
     </span>
   </a>
@@ -863,14 +863,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../formats/text/" class="md-nav__link">
+      <a href="../formats/rows/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Text
+    Rows
   
 
     
@@ -1001,35 +1001,33 @@
 <p>AGON's defining feature is <strong>adaptive format selection</strong>—automatically choosing the most token-efficient encoding for your data while guaranteeing you'll never do worse than compact JSON.</p>
 <h3 id="how-auto-mode-works">How Auto Mode Works<a class="headerlink" href="#how-auto-mode-works" title="Permanent link">&para;</a></h3>
 <p>When you call <code>AGON.encode(data, format="auto")</code>, here's what happens:</p>
-<p>```mermaid
-flowchart TD
-    A[Start: Encode data with auto mode]</p>
-<div class="language-text highlight"><pre><span></span><code>A --&gt; B[Compact JSON baseline]
-A --&gt; C[AGONText format]
-A --&gt; D[AGONColumns format]
-A --&gt; E[AGONStruct format]
+<pre class="mermaid"><code>flowchart TD
+    A[Start: Encode data with auto mode]
 
-B --&gt; F[Count tokens for all formats]
-C --&gt; F
-D --&gt; F
-E --&gt; F
+    A --&gt; B[Compact JSON baseline]
+    A --&gt; C[AGONRows format]
+    A --&gt; D[AGONColumns format]
+    A --&gt; E[AGONStruct format]
 
-F --&gt; G{Find best format}
-G --&gt; H{Best saves ≥ threshold&lt;br/&gt;vs JSON?}
-H --&gt;|Yes| I[Return best format]
-H --&gt;|No| J[Return JSON]
-I --&gt; K[Token-efficient AGON]
-J --&gt; L[Safe JSON fallback]
+    B --&gt; F[Count tokens for all formats]
+    C --&gt; F
+    D --&gt; F
+    E --&gt; F
 
-style A fill:#1976D2,color:#fff,stroke:#0D47A1,stroke-width:2px
-style K fill:#388E3C,color:#fff,stroke:#1B5E20,stroke-width:2px
-style L fill:#F57C00,color:#fff,stroke:#E65100,stroke-width:2px
-</code></pre></div>
-<p>```</p>
+    F --&gt; G{Find best format}
+    G --&gt; H{Best saves ≥ threshold&lt;br/&gt;vs JSON?}
+    H --&gt;|Yes| I[Return best format]
+    H --&gt;|No| J[Return JSON]
+    I --&gt; K[Token-efficient AGON]
+    J --&gt; L[Safe JSON fallback]
+
+    style A fill:#1976D2,color:#fff,stroke:#0D47A1,stroke-width:2px
+    style K fill:#388E3C,color:#fff,stroke:#1B5E20,stroke-width:2px
+    style L fill:#F57C00,color:#fff,stroke:#E65100,stroke-width:2px</code></pre>
 <p><strong>The 5-step process:</strong></p>
 <ol>
 <li><strong>Baseline</strong>: Encode data to compact JSON and count tokens</li>
-<li><strong>Try specialized formats</strong>: Encode with AGONText, AGONColumns, and AGONStruct</li>
+<li><strong>Try specialized formats</strong>: Encode with AGONRows, AGONColumns, and AGONStruct</li>
 <li><strong>Measure</strong>: Count tokens for each specialized format</li>
 <li><strong>Compare</strong>: Calculate savings percentage vs JSON baseline</li>
 <li><strong>Decide</strong>:<ul>
@@ -1120,7 +1118,7 @@ style L fill:#F57C00,color:#fff,stroke:#E65100,stroke-width:2px
 <h2 id="the-three-specialized-formats">The Three Specialized Formats<a class="headerlink" href="#the-three-specialized-formats" title="Permanent link">&para;</a></h2>
 <p>AGON provides three encoding formats, each optimized for different data shapes:</p>
 <h3 id="format-comparison">Format Comparison<a class="headerlink" href="#format-comparison" title="Permanent link">&para;</a></h3>
-<h4 id="agontext">AGONText<a class="headerlink" href="#agontext" title="Permanent link">&para;</a></h4>
+<h4 id="agonrows">AGONRows<a class="headerlink" href="#agonrows" title="Permanent link">&para;</a></h4>
 <p><strong>Row-based tabular encoding</strong></p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>[3]{id  name    role}
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>1   Alice   admin
@@ -1167,7 +1165,7 @@ style L fill:#F57C00,color:#fff,stroke:#E65100,stroke-width:2px
 <p><strong>Token savings:</strong> 30-50% vs pretty JSON</p>
 <h3 id="format-selection-patterns">Format Selection Patterns<a class="headerlink" href="#format-selection-patterns" title="Permanent link">&para;</a></h3>
 <p>Different data shapes naturally favor different formats:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Uniform Arrays → Text</label><label for="__tabbed_2_2">Wide Tables → Columns</label><label for="__tabbed_2_3">Nested Patterns → Struct</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Uniform Arrays → Rows</label><label for="__tabbed_2_2">Wide Tables → Columns</label><label for="__tabbed_2_3">Nested Patterns → Struct</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
@@ -1177,14 +1175,14 @@ style L fill:#F57C00,color:#fff,stroke:#E65100,stroke-width:2px
 </span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="p">]</span>
 </span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
 </span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="n">result</span> <span class="o">=</span> <span class="n">AGON</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">)</span>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="c1"># → Selects &quot;text&quot; format</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="c1"># → Selects &quot;rows&quot; format</span>
 </span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="c1">#</span>
 </span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="c1"># [3]{id    name    score}</span>
 </span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="c1"># 1 Alice   95</span>
 </span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="c1"># 2 Bob 87</span>
 </span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="c1"># 3 Charlie 92</span>
 </span></code></pre></div>
-<p><strong>Why text wins:</strong> Consistent structure, few fields, perfect for row-based encoding.</p>
+<p><strong>Why rows wins:</strong> Consistent structure, few fields, perfect for row-based encoding.</p>
 </div>
 <div class="tabbed-block">
 <div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
@@ -1257,7 +1255,7 @@ style L fill:#F57C00,color:#fff,stroke:#E65100,stroke-width:2px
 <td><strong>baseline</strong></td>
 </tr>
 <tr>
-<td>AGONText</td>
+<td>AGONRows</td>
 <td>113,132</td>
 <td>+20.8%</td>
 <td>-23.4% (worse)</td>
@@ -1270,7 +1268,7 @@ style L fill:#F57C00,color:#fff,stroke:#E65100,stroke-width:2px
 </tr>
 <tr>
 <td>AGONStruct</td>
-<td>89,011</td>
+<td>89,012</td>
 <td>+37.7%</td>
 <td><strong>+2.9%</strong> (below threshold)</td>
 </tr>
@@ -1332,9 +1330,9 @@ style L fill:#F57C00,color:#fff,stroke:#E65100,stroke-width:2px
 </tr>
 </tbody>
 </table>
-<h3 id="when-they-produce-identical-output">When They Produce Identical Output<a class="headerlink" href="#when-they-produce-identical-output" title="Permanent link">&para;</a></h3>
-<p>For uniform arrays, <code>AGONText</code> and TOON produce <strong>near identical output</strong>:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">TOON Output</label><label for="__tabbed_3_2">AGON Text Output</label></div>
+<h3 id="when-they-produce-nearly-identical-output">When They Produce Nearly Identical Output<a class="headerlink" href="#when-they-produce-nearly-identical-output" title="Permanent link">&para;</a></h3>
+<p>For uniform arrays, <code>AGONRows</code> and TOON produce <strong>nearly identical output</strong>:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">TOON Output</label><label for="__tabbed_3_2">AGON Rows Output</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>context:
@@ -1362,7 +1360,7 @@ style L fill:#F57C00,color:#fff,stroke:#E65100,stroke-width:2px
 </div>
 </div>
 </div>
-<p><strong>The only difference is AGONText uses the <code>\t</code> delimiter</strong></p>
+<p><strong>The only difference:</strong> AGONRows uses tabs while TOON uses commas as delimiters</p>
 <p>Both: 96 tokens (+58.1% savings vs pretty JSON, +30.9% vs compact JSON)</p>
 <div class="admonition info">
 <p class="admonition-title">Choosing Between AGON and TOON</p>
@@ -1385,7 +1383,7 @@ style L fill:#F57C00,color:#fff,stroke:#E65100,stroke-width:2px
 <p>AGON provides maximum value in these scenarios:</p>
 <ul>
 <li><strong>Variable data pipelines</strong> where data shape changes between requests</li>
-<li><strong>Uniform arrays</strong> with consistent fields (AGONText: 40-60% savings)</li>
+<li><strong>Uniform arrays</strong> with consistent fields (AGONRows: 40-60% savings)</li>
 <li><strong>Wide tables</strong> with 10+ columns (AGONColumns: 50-70% savings)</li>
 <li><strong>Repeated nested patterns</strong> like market data with <code>{fmt, raw}</code> everywhere (AGONStruct: 30-50% savings)</li>
 <li><strong>Cost-sensitive applications</strong> where every token counts</li>
@@ -1412,7 +1410,7 @@ style L fill:#F57C00,color:#fff,stroke:#E65100,stroke-width:2px
 <p>Detailed documentation of all methods and parameters</p>
 <h3 id="json-fallback"><a href="../formats/json/">JSON Fallback</a><a class="headerlink" href="#json-fallback" title="Permanent link">&para;</a></h3>
 <p>View how JSON is used as a safety net</p>
-<h3 id="agontext-format"><a href="../formats/text/">AGONText Format</a><a class="headerlink" href="#agontext-format" title="Permanent link">&para;</a></h3>
+<h3 id="agonrows-format"><a href="../formats/rows/">AGONRows Format</a><a class="headerlink" href="#agonrows-format" title="Permanent link">&para;</a></h3>
 <p>Complete guide to row-based encoding</p>
 <h3 id="benchmarks"><a href="../benchmarks/">Benchmarks</a><a class="headerlink" href="#benchmarks" title="Permanent link">&para;</a></h3>
 <p>Real-world token savings across 7 datasets</p>
